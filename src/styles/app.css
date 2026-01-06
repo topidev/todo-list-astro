@@ -3,7 +3,7 @@ body {
 }
 
 p,h2,h1,h3,h4,h5,span,input {
-    color:#fff;
+    color:#bababa;
 }
 
 .fixed-sidebar, .fixed-menu, .floating-menu {
@@ -14,16 +14,17 @@ p,h2,h1,h3,h4,h5,span,input {
     border:0;
     padding:5px 0;
     box-shadow: 0px 1px 4px 1px rgba(0,0,0, 0.4);
-    > div[role='menuitem'] {
-        border-radius: 0;
-    }
 }
 
+.floating-menu > div[role='menuitem'] {
+    border-radius: 0;
+}
 .fixed-sidebar {
     border-right: 0;
-    .sidebar-title { color:#dedede; }
-    svg { color:#fff; }
+    svg { color:#dedede; }
 }
+
+.fixed-sidebar .sidebar-title { color:#dedede; }
 
 .fixed-menu {
     border-color:#333;
@@ -33,4 +34,25 @@ p,h2,h1,h3,h4,h5,span,input {
     &:hover {
         background-color: #414141;
     }
+}
+
+
+/* board */
+
+.board-container {
+    margin:0 auto;
+    max-width: 1500px;
+}
+
+div.state {
+    width: 100%;
+    padding: .5rem 1rem;
+    justify-content:flex-start;
+    border-bottom: 1px solid #414141;
+}
+
+input.activity {
+    padding: .5rem 1rem;
+    border:1px solid #dedede;
+    background-color: #212121;
 }
