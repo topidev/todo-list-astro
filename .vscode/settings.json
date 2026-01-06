@@ -1,0 +1,6 @@
+{
+    "editor.fontFamily": "JetBrains Mono",
+    "editor.fontLigatures": true, // Opcional, para símbolos especiales
+    "terminal.integrated.fontFamily": "monospace" // Para la terminal integrada
+
+}
