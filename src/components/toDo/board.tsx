@@ -40,6 +40,7 @@ export default function Board() {
                     type="text" 
                     id="ideasInput"
                     name="ideasInput"
+                    value={inputValue}
                     onKeyDown={handleEnter} 
                     className="activity mb-4 mt-2 w-full rounded " 
                     onChange={e => setInputValue(e.target.value)} 

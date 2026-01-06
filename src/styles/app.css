@@ -43,6 +43,10 @@ p,h2,h1,h3,h4,h5,span,input {
     margin:0 auto;
     max-width: 1500px;
 }
+.board-container.disable {
+    opacity:0.3;
+    pointer-events:none;
+}
 
 div.state {
     width: 100%;

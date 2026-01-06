@@ -21,23 +21,12 @@ function AppContent() {
           <h1 className="text-2xl md:text-3xl lg:text-5xl font-extrabold mb-2 text-blue-600">📝 My ToDo List</h1>
           <p className="text-md md:text-lg ">Organiza tus actividades</p>
         </div>
-
-        {user ? (
-          <div>
-            <Board />
-            {/* Aquí irá el tablero de tareas */}
-            {/* <p className="text-center text-gray-500">
-              El tablero de tareas aparecerá aquí...
-            </p> */}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-6 py-4 md:py-10">
-            <p className="text-lg md:text-2xl text-center ">
-              Inicia sesión para comenzar a organizar tus tareas
-            </p>
-            <Board/>
-          </div>
-        )}
+        <div className="flex flex-col items-center gap-6 py-4 md:py-10">
+          <p className="text-lg md:text-2xl text-center ">
+            Inicia sesión para comenzar a organizar tus tareas
+          </p>
+          <Board/>
+        </div>
       </div>
     </div>
   )
