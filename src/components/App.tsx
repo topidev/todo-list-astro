@@ -22,9 +22,13 @@ function AppContent() {
           <p className="text-md md:text-lg ">Organiza tus actividades</p>
         </div>
         <div className="flex flex-col items-center gap-6 py-4 md:py-10">
-          <p className="text-lg md:text-2xl text-center ">
-            Inicia sesión para comenzar a organizar tus tareas
-          </p>
+          {user ? (
+            <></>
+          ): (
+            <p className="text-lg md:text-2xl text-center ">
+              Inicia sesión para comenzar a organizar tus tareas
+            </p>
+          )}
           <Board/>
         </div>
       </div>

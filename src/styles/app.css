@@ -21,31 +21,27 @@ p,h2,h1,h3,h4,h5,span,input {
 }
 .fixed-sidebar {
     border-right: 0;
-    svg { color:#dedede; }
 }
 
 .fixed-sidebar .sidebar-title { color:#dedede; }
 
 .fixed-menu {
     border-color:#333;
-    svg {
-        color:#dedede;
-    }
-    &:hover {
-        background-color: #414141;
-    }
 }
 
+.fixed-menu:hover {
+    background-color: #414141;
+}
+
+.fixed-sidebar svg, .fixed-menu svg {
+    color:#dedede;
+}
 
 /* board */
 
 .board-container {
     margin:0 auto;
     max-width: 1500px;
-}
-.board-container.disable {
-    opacity:0.3;
-    pointer-events:none;
 }
 
 div.state {

@@ -4,4 +4,4 @@ export interface Idea {
   status: Status;
 }
 
-type Status = 'new' | 'inProgress' | 'onPaused' | 'finished' | 'dropped';
+export type Status = 'new' | 'inProgress' | 'paused' | 'finished' | 'dropped';
