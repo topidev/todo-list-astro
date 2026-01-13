@@ -7,9 +7,10 @@ interface ColumnProps {
   title: string
   color: string
   ideas: Idea[]
+  onStatusChange?: (taskId: string, newStatus: string) => void
 }
 
-export default function Column({ id, title, color, ideas }: ColumnProps) {
+export default function Column({ id, title, color, ideas, onStatusChange }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: id,
   })
@@ -23,7 +24,7 @@ export default function Column({ id, title, color, ideas }: ColumnProps) {
     >
       {/* Header de columna */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-gray-500 text-sm md:text-base lg:text-lg font-bold">
+        <h2 className="text-gray-600 text-sm md:text-base lg:text-lg font-bold">
           {title}
         </h2>
         <span className="text-gray-500 text-xs bg-white px-2 py-1 rounded-full font-semibold">
@@ -39,7 +40,11 @@ export default function Column({ id, title, color, ideas }: ColumnProps) {
           </p>
         ) : (
           ideas.map(idea => (
-            <TaskCard key={idea.id} idea={idea} />
+            <TaskCard 
+              key={idea.id} 
+              idea={idea} 
+              onStatusChange={onStatusChange}  
+            />
           ))
         )}
       </div>
