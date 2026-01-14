@@ -7,6 +7,7 @@ import Column from "./column"
 import TaskCard from "./taskCard"
 import ColumnGrid from "../ui/columnGrid"
 import IdeaInput from "../ui/inputTask"
+import { useIsMobile } from "../../layouts/useMediaQuery"
 
 interface MobileBoardProps {
     user: any;
@@ -27,44 +28,6 @@ const COLUMNS: { id: Status; title: string; color: string }[] = [
     { id: 'dropped', title: 'Abandonada', color: 'bg-red-100 border-red-200' },
 ]
 
-function MobileBoard({ 
-    user, inputValue, setInputValue, handleEnter, ideasList, handleStatusChange, activeTask 
-}: MobileBoardProps) {
-    return (
-        <div
-            className="mobile-board w-full px-4"
-        >
-            <div className={`board-container p-2 w-full h-full flex flex-col ${user ? '' : 'opacity-30 pointer-events-none'}`}>
-                {/* Input para nuevas ideas */}
-                <div className="input-form w-full mb-6">
-                    <h3 className="mb-2 text-lg md:text-xl lg:text-2xl font-semibold">
-                        ¿Qué se te ocurre hoy?
-                    </h3>
-                    <IdeaInput
-                        value={inputValue} 
-                        onChange={e => setInputValue(e.target.value)} 
-                        onKeyDown={handleEnter}
-                        disabled={!user}
-                    />
-                </div>
-
-                {/* Grid de columnas */}
-                <ColumnGrid
-                    grid={COLUMNS}
-                    ideasList={ideasList}
-                    onStatusChange={handleStatusChange}
-                />
-
-                {/* Overlay para mostrar la tarea mientras se arrastra */}
-                <DragOverlay>
-                    {activeTask ? (
-                        <TaskCard idea={activeTask} isDragging />
-                    ) : null}
-                </DragOverlay>
-            </div>
-        </div>
-    )
-}
 
 export default function Board() {
     // - Valor del input
@@ -77,32 +40,7 @@ export default function Board() {
     const [activeId, setActiveId] = useState<string | null>(null)
     
     // - revisar si es mobile 
-    const [isMobile, setIsMobile] = useState(true)
-
-    // - UseEffect para el windows resize
-    useEffect(() => {
-        function handleResize() {
-            console.log(window.innerWidth)
-            if (window.innerWidth > 768) {
-                console.log("Desktop View")
-                setIsMobile(false)
-            }
-            else {
-                setIsMobile(true)
-                console.log("MObile View")
-            }
-        }
-
-        handleResize()
-
-        window.addEventListener("resize", handleResize)
-
-        return () => {  
-            window.removeEventListener("resize", handleResize)
-        }
-        
-    }, [])
-
+    const isMobile = useIsMobile()
 
     // - Método para el enter en el input
     const handleEnter = (e : React.KeyboardEvent) => {
@@ -160,60 +98,50 @@ export default function Board() {
 
     const activeTask = ideasList.find(idea => idea.id === activeId)
 
+    const boardContent = (
+        <div className={`board-container p-2 w-full h-full flex flex-col ${user ? '' : 'opacity-30 pointer-events-none select-none'}`}>
+            {/* Input para nuevas ideas */}
+            <div className="input-form w-full mb-6">
+                <h3 className="mb-2 text-lg md:text-xl lg:text-2xl font-semibold">
+                    ¿Qué se te ocurre hoy?
+                </h3>
+                <IdeaInput
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                    onKeyDown={handleEnter}
+                    disabled={!user}
+                />
+            </div>
+
+            {/* Grid de columnas */}
+            <ColumnGrid
+                grid={COLUMNS}
+                ideasList={ideasList}
+                onStatusChange={handleStatusChange}
+            />
+        </div>
+    )
+
+    // Mobile: Sin drag & drop
+    if (isMobile) {
+        return <div className="mobile-board w-full px-4">{boardContent}</div>
+    }
+
+    // Desktop: Con drag & drop
     return (
-        <>
-            {
-                isMobile ? (
-                    <MobileBoard 
-                        user={user}
-                        inputValue={inputValue}
-                        setInputValue={setInputValue}
-                        handleEnter={handleEnter}
-                        ideasList={ideasList}
-                        handleStatusChange={handleStatusChange}
-                        activeTask={activeTask}
-                    />
-                ): (
-                    <DndContext
-                        collisionDetection={closestCorners}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                        onDragCancel={handleDragCancel}
-                    >
-                        <div className={`board-container p-2 w-full h-full flex flex-col ${user ? '' : 'opacity-30 pointer-events-none'}`}>
-                            {/* Input para nuevas ideas */}
-                            <div className="input-form w-full mb-6">
-                                <h3 className="mb-2 text-lg md:text-xl lg:text-2xl font-semibold">
-                                    ¿Qué se te ocurre hoy?
-                                </h3>
-                                
-                                <IdeaInput
-                                    value={inputValue} 
-                                    onChange={e => setInputValue(e.target.value)} 
-                                    onKeyDown={handleEnter}
-                                    disabled={!user}
-                                />
-                            </div>
-
-                            {/* Grid de columnas */}
-                            <ColumnGrid
-                                grid={COLUMNS}
-                                ideasList={ideasList}
-                                onStatusChange={handleStatusChange}
-                            />
-
-                            {/* Overlay para mostrar la tarea mientras se arrastra */}
-                            <DragOverlay>
-                                {activeTask ? (
-                                    <TaskCard idea={activeTask} isDragging />
-                                ) : null}
-                            </DragOverlay>
-                        </div>
-                    </DndContext>
-                )
-            }
-        </>
-        
+        <DndContext
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+        >
+            {boardContent}
+            
+            {/* Overlay para mostrar la tarea mientras se arrastra */}
+            <DragOverlay>
+                {activeTask ? <TaskCard idea={activeTask} isDragging /> : null}
+            </DragOverlay>
+        </DndContext>
     )
 }
 

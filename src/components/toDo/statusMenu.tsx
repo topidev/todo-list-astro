@@ -73,7 +73,7 @@ export default function StatusMenu({ currentStatus, onSelect, onClose }: StatusM
                 className={`w-full flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${
                   option.id === currentStatus
                     ? 'border-gray-300 bg-gray-100 opacity-50 cursor-not-allowed'
-                    : `border-gray-200 ${option.color} active:scale-95`
+                    : `border-gray-200 ${option.color} shadow-md active:scale-95 active:shadow`
                 }`}
               >
                 <span className="text-2xl">{option.icon}</span>
