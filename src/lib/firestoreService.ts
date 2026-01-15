@@ -73,7 +73,7 @@ export async function addMemberToBoard(boardId: string, userId: string): Promise
   }
 
   const board = boardSnap.data() as Board
-  
+
   if (!board.members.includes(userId)) {
     await updateDoc(boardRef, {
       members: [...board.members, userId],
@@ -94,7 +94,7 @@ async function updateUserBoards(userId: string, boardId: string): Promise<void> 
   if (userSnap.exists()) {
     const userData = userSnap.data()
     const boards = userData.boards || []
-    
+
     if (!boards.includes(boardId)) {
       await updateDoc(userRef, {
         boards: [...boards, boardId],

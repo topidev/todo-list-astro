@@ -3,23 +3,14 @@ import { useAuth } from "../auth/AuthProvider"
 import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core'
 import type { Idea, Status } from "../../types/types"
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
-import Column from "./column"
 import TaskCard from "./taskCard"
 import ColumnGrid from "../ui/columnGrid"
 import IdeaInput from "../ui/inputTask"
 import { useIsMobile } from "../../layouts/useMediaQuery"
+import { useBoard } from "../../hooks/useBoard"
 
-interface MobileBoardProps {
-    user: any;
-    inputValue: string;
-    setInputValue: (val: string) => void;
-    handleEnter: (e: React.KeyboardEvent) => void;
-    ideasList: Idea[];
-    handleStatusChange: (id: string, status: string) => void;
-    activeTask: Idea | undefined;
-}
 
-//- Arreglo para tareas dinamicas
+//- Arreglo para columnas dinamicas
 const COLUMNS: { id: Status; title: string; color: string }[] = [
     { id: 'new', title: 'Ideas', color: 'bg-blue-100 border-blue-200' },
     { id: 'inProgress', title: 'En Proceso', color: 'bg-yellow-100 border-yellow-200' },
@@ -32,29 +23,23 @@ const COLUMNS: { id: Status; title: string; color: string }[] = [
 export default function Board() {
     // - Valor del input
     const [inputValue, setInputValue] = useState('')
-    // - Lista de Idea (Despues buscar en base de datos)
-    const [ideasList, setIdeasList] = useState<Idea[]>([])
     // - Revisar el inicio de sesión
     const { user } = useAuth()
     // - Estado de si una tarea está "Drag"
     const [activeId, setActiveId] = useState<string | null>(null)
-    
+
     // - revisar si es mobile 
     const isMobile = useIsMobile()
 
+    // - FireBase Hook desde useBoard
+    const { tasks, loading, addTask, updateStatus } = useBoard()
+
     // - Método para el enter en el input
-    const handleEnter = (e : React.KeyboardEvent) => {
+    const handleEnter = async (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && inputValue.trim()) {
-            e.preventDefault() 
-            console.log("Nueva Idea: " + inputValue)
+            e.preventDefault()
 
-            const newIdea: Idea = {
-                id: crypto.randomUUID(), // Genera un ID único
-                text: inputValue.trim(),
-                status: 'new' 
-            };
-
-            setIdeasList([...ideasList, newIdea])
+            await addTask(inputValue.trim())
             setInputValue('')
         }
     }
@@ -63,9 +48,9 @@ export default function Board() {
         setActiveId(event.active.id as string)
     }
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event
-        
+
         if (!over) {
             setActiveId(null)
             return
@@ -74,12 +59,7 @@ export default function Board() {
         const taskId = active.id as string
         const newStatus = over.id as Status
 
-        // Actualizar el status de la tarea
-        setIdeasList(prev =>
-            prev.map(idea =>
-                idea.id === taskId ? { ...idea, status: newStatus } : idea
-            )
-        )
+        await updateStatus(taskId, newStatus)
 
         setActiveId(null)
     }
@@ -88,15 +68,22 @@ export default function Board() {
         setActiveId(null)
     }
 
-    const handleStatusChange = (taskId: string, newStatus: string) => {
-        setIdeasList(prev =>
-            prev.map(idea =>
-                idea.id === taskId ? { ...idea, status: newStatus as Status } : idea
-            )
-        )
+    const handleStatusChange = async (taskId: string, newStatus: string) => {
+        await updateStatus(taskId, newStatus as Status)
     }
 
-    const activeTask = ideasList.find(idea => idea.id === activeId)
+    const activeTask = tasks.find(idea => idea.id === activeId)
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Cargando tablero ...</p>
+                </div>
+            </div>
+        )
+    }
 
     const boardContent = (
         <div className={`board-container p-2 w-full h-full flex flex-col ${user ? '' : 'opacity-30 pointer-events-none select-none'}`}>
@@ -116,7 +103,7 @@ export default function Board() {
             {/* Grid de columnas */}
             <ColumnGrid
                 grid={COLUMNS}
-                ideasList={ideasList}
+                ideasList={tasks}
                 onStatusChange={handleStatusChange}
             />
         </div>
@@ -136,7 +123,7 @@ export default function Board() {
             onDragCancel={handleDragCancel}
         >
             {boardContent}
-            
+
             {/* Overlay para mostrar la tarea mientras se arrastra */}
             <DragOverlay>
                 {activeTask ? <TaskCard idea={activeTask} isDragging /> : null}
