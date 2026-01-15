@@ -1,45 +1,87 @@
+import { useBoard } from '../hooks/useBoard'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import Board from './toDo/board'
 import Sidebar from './ui/Sidebar'
 import { Button } from './ui/button'
+import GoogleLogo from '../assets/icons8-google.svg'
 
 function AppContent() {
-  const { user, loading, signInWithGoogle } = useAuth()
+  const { user, loading: authLoading, signInWithGoogle } = useAuth()
 
-  if (loading) {
+  const {
+    boards,
+    currentBoard,
+    loading: boardLoading,
+    addBoard,
+    switchBoard,
+    removeBoard
+  } = useBoard()
+
+  if (authLoading || boardLoading) {
     return (
       <div className="ml-0 md:ml-64 p-8">
-        <p className="text-gray-600">Cargando...</p>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando...</p>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="ml-0 md:ml-64 min-h-screen pt-16 md:pt-0">
-      <div className="container mx-auto max-w-7xl py-8">
-        <div className="text-center mb-4 md:mb-6">
-          <h1 className="text-2xl md:text-3xl lg:text-5xl font-extrabold mb-2 text-blue-600">📝 My ToDo List</h1>
-          <p className="text-md md:text-lg ">Organiza tus actividades</p>
-        </div>
-        <div className="flex flex-col items-center gap-6 py-4 md:py-10">
+    <>
+      <Sidebar
+        boards={boards}
+        currentBoard={currentBoard}
+        onSelectBoard={switchBoard}
+        onCreateBoard={addBoard}
+        onDeleteBoard={removeBoard}
+      />
+      <div className="ml-0 md:ml-64 min-h-screen pt-16 md:pt-0">
+        <div className="container mx-auto max-w-7xl py-8">
           {user ? (
-            <></>
-          ): (
-            <p className="text-lg md:text-2xl text-center ">
-              Inicia sesión para comenzar a organizar tus tareas
-            </p>
+            <>
+              {/* header con el nombre del board actual */}
+              {currentBoard && (
+                <div className="mb-6 px-4">
+                  <h1 className="text-2xl md:text-3xl font-bold text-blue-800">
+                    {currentBoard.name}
+                  </h1>
+                  {/* <p className="text-sm text-gray-500 mt-1">
+                    {boards.length} {boards.length === 1 ? 'tablero' : 'tableros'} total
+                  </p> */}
+                </div>
+              )}
+
+              <Board />
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-6 py-12">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold mb-2">📝 My Todo List</h1>
+                <p className="text-lg text-gray-600 mb-6">
+                  Organiza tus actividades y colabora con otros
+                </p>
+              </div>
+              <Button onClick={signInWithGoogle} size="lg">
+                <img src={GoogleLogo.src} alt="Google" className="mr-2 h-4 w-4" />
+                Iniciar sesión con Google
+              </Button>
+            </div>
           )}
-          <Board/>
         </div>
       </div>
-    </div>
+    </>
+
   )
 }
 
 export default function App() {
+
   return (
     <AuthProvider>
-      <Sidebar />
       <AppContent />
     </AuthProvider>
   )

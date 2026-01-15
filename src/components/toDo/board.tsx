@@ -32,7 +32,7 @@ export default function Board() {
     const isMobile = useIsMobile()
 
     // - FireBase Hook desde useBoard
-    const { tasks, loading, addTask, updateStatus } = useBoard()
+    const { tasks, loading, addTask, updateStatus, removeTask } = useBoard()
 
     // - Método para el enter en el input
     const handleEnter = async (e: React.KeyboardEvent) => {
@@ -105,6 +105,7 @@ export default function Board() {
                 grid={COLUMNS}
                 ideasList={tasks}
                 onStatusChange={handleStatusChange}
+                onDelete={removeTask}
             />
         </div>
     )

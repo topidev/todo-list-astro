@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Menu } from 'lucide-react'
+import { Check, Menu, Plus, Trash2, X } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { Button } from './button'
 import { Avatar, AvatarImage, AvatarFallback } from './avatar'
@@ -18,58 +18,173 @@ import {
 } from './dropdown-menu'
 import GoogleLogo from '../../assets/icons8-google.svg'
 
-function SidebarContent() {
+
+interface SideBarProps {
+  boards: Array<{ id: string; name: string; owner: string }>
+  currentBoard: { id: string; name: string; owner: string } | null
+  onSelectBoard: (boardId: string) => void
+  onCreateBoard: (name: string) => void
+  onDeleteBoard?: (boardId: string) => void
+}
+
+function SidebarContent({
+  boards,
+  currentBoard,
+  onSelectBoard,
+  onCreateBoard,
+  onDeleteBoard
+}: SideBarProps) {
+
   const { user, signInWithGoogle, signOut } = useAuth()
-  
+  const [isCreating, setIsCreating] = useState(false)
+  const [newBoardName, setNewBoardName] = useState('')
+
   const userName = user?.displayName ? user.displayName.split(' ')[0] : ''
+
+  const handleCreateBoard = () => {
+    if (newBoardName.trim()) {
+      onCreateBoard(newBoardName.trim())
+      setNewBoardName('')
+      setIsCreating(false)
+    }
+  }
+
+  const handleDeleteBoard = (boardId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    if (boards.length === 1) {
+      alert('No puedes eliminar tu unico tablero')
+      return
+    }
+    if (confirm('¿Estás seguro de eliminar este tablero? Esta acción no se puede deshacer.')) {
+      onDeleteBoard?.(boardId)
+    }
+
+  }
+
 
   return (
     <div className="flex h-full justify-between flex-col">
       {/* Header */}
-      <div className="">
-        {user ? (
-            <h1 className="text-xl font-bold">{ userName }</h1>
-        ): (
-            <h1 className="text-xl font-bold">toDo List</h1>
-        )}
-    </div>
+      <div className=" my-4">
+        <h2 className='text-xl font-bold'> To-Do List </h2>
+      </div>
 
 
-      {/* Spacer */}
-      {/* <div className="flex-1" /> */}
+      {/* Sección de Boards */}
+      {user && (
+        <div className="flex-1 overflow-auto mb-4">
+          <div className="flex items-center mt-4 justify-between mb-2">
+            <h2 className="text-sm font-semibold text-gray-600 uppercase">
+              Tableros
+            </h2>
+            <button
+              onClick={() => setIsCreating(true)}
+              className=""
+              title='Crear nuevo tablero'
+            >
+              <Plus className='h-5 w-5 rounded transition-colors  hover:bg-gray-200 hover:text-gray-700' />
+            </button>
+          </div>
+
+          {/* Crear Formulario del Tablero */}
+          {isCreating && (
+            <div className="mb-2 p-2 bg-white border rounded-lg">
+              <input
+                autoFocus
+                type="text"
+                value={newBoardName}
+                placeholder='Nombre del Tablero'
+                onChange={(e) => setNewBoardName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
+                className="w-full px-2 py-1 text-gray-700 text-sm border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="flex gap-1">
+                <button className="flex-1 flex text-white items-center justify-center gap-1 px-2 py-1 bg-blue-500 text white rounded text-sm hover:bg-blue-600 transition-colors">
+                  Crear
+                </button>
+                <button
+                  onClick={() => {
+                    setIsCreating(false)
+                    setNewBoardName('')
+                  }}
+                  className="flex-1 flex text-gray-800 items-center justify-center gap-1 px-2 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300 transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* lista de tableros */}
+          <div className="space-y-1">
+            {boards.map(board => (
+              <div
+                key={board.id}
+                className={`group flex itemes-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${currentBoard?.id === board.id ?
+                  'bg-blue-100 border border-blue-300' :
+                  'hover:bg-gray-100'
+                  }`}
+                onClick={() => onSelectBoard(board.id)}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{board.name}</p>
+                  {board.owner === user?.uid && (
+                    <p className="text-sm text-gray-500">Propiertario</p>
+                  )}
+                </div>
+
+                {board.owner === user?.uid && boards.length > 1 && (
+                  <button
+                    onClick={(e) => handleDeleteBoard(board.id, e)}
+                    title='Eliminar Tablero'
+                    className="opacity-0 group-hover:opacity-100 p1 hover:bg-red-100 rounded transition-all">
+                    <Trash2 className='h-4 w-4 text-red-500' />
+                  </button>
+                )}
+
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1"></div>
 
       {/* Usuario */}
-      {user ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex w-full items-center gap-3 rounded-md p-2 hover:bg-zinc-800 cursor-pointer">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user.photoURL || undefined} />
-                <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 text-left overflow-hidden">
-                <p className="text-sm font-medium truncate">{user.displayName}</p>
-                <p className="text-xs text-gray-600 truncate">{user.email}</p>
-              </div>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className='floating-menu'>
-            <DropdownMenuItem onClick={signOut} className="text-red-500 ">
-              Cerrar sesión
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <Button onClick={signInWithGoogle} className="w-full">
+      {
+        user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex w-full border border-gray-600 items-center gap-3 rounded-md p-2 hover:bg-zinc-800 cursor-pointer">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.photoURL || undefined} />
+                  <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left overflow-hidden">
+                  <p className="text-sm font-medium truncate">{user.displayName}</p>
+                  <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='floating-menu'>
+              <DropdownMenuItem onClick={signOut} className="text-red-500 ">
+                Cerrar sesión
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button onClick={signInWithGoogle} className="w-full">
             <img src={GoogleLogo.src} alt="Google" className="mr-2 h-4 w-4" />
             Iniciar sesión
-        </Button>
-      )}
-    </div>
+          </Button>
+        )
+      }
+    </div >
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar(props: SideBarProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -90,14 +205,14 @@ export default function Sidebar() {
             <SheetTitle className='sidebar-title'>MENÚ</SheetTitle>
           </SheetHeader>
           <div className="mt-4 h-full">
-            <SidebarContent />
+            <SidebarContent {...props} />
           </div>
         </SheetContent>
       </Sheet>
 
       {/* Sidebar fijo para desktop */}
       <div className="hidden fixed-sidebar md:block fixed left-0 top-0 h-screen w-64 p-4">
-        <SidebarContent />
+        <SidebarContent {...props} />
       </div>
     </>
   )

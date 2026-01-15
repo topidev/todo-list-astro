@@ -6,6 +6,7 @@ import {
     createTask,
     updateTaskStatus,
     deleteTask,
+    deleteBoard,
     subscribeToTasks,
 } from '../lib/firestoreService'
 import type { Board, Idea, Status } from '../types/types'
@@ -61,20 +62,16 @@ export function useBoard() {
     // Suscribirse a cambios en tiempo real de las tareas
     useEffect(() => {
         if (!currentBoard) {
-            console.log('No hay Tablero ❌')
             setTasks([])
             return
         }
 
-        console.log('✅ Suscribiendo a tareas del board:', currentBoard.id)
 
         const unsubscribe = subscribeToTasks(currentBoard.id, (updatedTasks) => {
-            console.log('🔄 Tareas actualizadas desde Firebase:', updatedTasks)
             setTasks(updatedTasks)
         })
 
         return () => {
-            console.log('🛑 Desuscribiendo del board:', currentBoard.id)
             unsubscribe()
         }
     }, [currentBoard])
@@ -83,7 +80,6 @@ export function useBoard() {
     const addTask = async (text: string) => {
         if (!currentBoard || !user) return
 
-        console.log(currentBoard)
         try {
             await createTask(currentBoard.id, text, user.uid)
             // El listener actualizará automáticamente las tareas
@@ -144,6 +140,27 @@ export function useBoard() {
         }
     }
 
+    // Eliminar board
+    const removeBoard = async (boardId: string) => {
+        if (!user) return
+
+        try {
+            await deleteBoard(boardId, user.uid)
+
+            // Actualizar la lista local
+            const updatedBoards = boards.filter(b => b.id !== boardId)
+            setBoards(updatedBoards)
+
+            // Si eliminamos el board actual, cambiar a otro
+            if (currentBoard?.id === boardId && updatedBoards.length > 0) {
+                setCurrentBoard(updatedBoards[0])
+            }
+        } catch (error) {
+            console.error('Error eliminando board:', error)
+            alert(error instanceof Error ? error.message : 'Error eliminando tablero')
+        }
+    }
+
     return {
         boards,
         currentBoard,
@@ -154,5 +171,6 @@ export function useBoard() {
         removeTask,
         addBoard,
         switchBoard,
+        removeBoard
     }
 }

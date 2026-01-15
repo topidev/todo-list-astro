@@ -108,6 +108,61 @@ async function updateUserBoards(userId: string, boardId: string): Promise<void> 
   }
 }
 
+/**
+ * Eliminar un board y todas sus tareas
+ */
+export async function deleteBoard(boardId: string, userId: string): Promise<void> {
+  const boardRef = doc(db, 'boards', boardId)
+  const boardSnap = await getDoc(boardRef)
+
+  if (!boardSnap.exists()) {
+    throw new Error('Board no encontrado')
+  }
+
+  const board = boardSnap.data() as Board
+
+  // Solo el owner puede eliminar el board
+  if (board.owner !== userId) {
+    throw new Error('No tienes permisos para eliminar este tablero')
+  }
+
+  // Eliminar todas las tareas primero
+  const tasksRef = collection(db, 'boards', boardId, 'tasks')
+  const tasksSnapshot = await getDocs(tasksRef)
+
+  const deletePromises = tasksSnapshot.docs.map(taskDoc =>
+    deleteDoc(doc(db, 'boards', boardId, 'tasks', taskDoc.id))
+  )
+
+  await Promise.all(deletePromises)
+
+  // Eliminar el board
+  await deleteDoc(boardRef)
+
+  // Remover el board de todos los usuarios miembros
+  for (const memberId of board.members) {
+    await removeUserBoard(memberId, boardId)
+  }
+}
+
+
+/**
+ * Remover un board de la lista de un usuario
+  */
+async function removeUserBoard(userId: string, boardId: string): Promise<void> {
+  const userRef = doc(db, 'users', userId)
+  const userSnap = await getDoc(userRef)
+
+  if (userSnap.exists()) {
+    const userData = userSnap.data()
+    const boards = userData.boards || []
+
+    await updateDoc(userRef, {
+      boards: boards.filter((id: string) => id !== boardId),
+    })
+  }
+}
+
 // ==================== TASKS ====================
 
 /**

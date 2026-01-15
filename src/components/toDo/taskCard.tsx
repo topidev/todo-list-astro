@@ -1,18 +1,25 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import type { Idea } from '../../types/types'
 import { useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import type { Idea } from '../../types/types'
 import StatusMenu from './statusMenu'
 
 interface TaskCardProps {
   idea: Idea
   isDragging?: boolean
   onStatusChange?: (taskId: string, newStatus: string) => void
+  onDelete?: (taskId: string) => void
 }
 
-export default function TaskCard({ idea, isDragging = false, onStatusChange }: TaskCardProps) {
+export default function TaskCard({
+  idea,
+  isDragging = false,
+  onStatusChange,
+  onDelete
+}: TaskCardProps) {
   const [showMenu, setShowMenu] = useState(false)
-  
+
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: idea.id,
   })
@@ -23,11 +30,9 @@ export default function TaskCard({ idea, isDragging = false, onStatusChange }: T
 
   const handleClick = (e: React.MouseEvent) => {
     // Solo en mobile (pantallas menores a 768px)
-    console.log("HandleClick")
     if (window.innerWidth < 768) {
       e.stopPropagation()
       setShowMenu(true)
-      console.log("Vista Mobile Menú")
     }
   }
 
@@ -38,6 +43,14 @@ export default function TaskCard({ idea, isDragging = false, onStatusChange }: T
     setShowMenu(false)
   }
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    if (confirm('¿Eliminar esta tarea?')) {
+      onDelete?.(idea.id)
+    }
+  }
+
   return (
     <>
       <div
@@ -46,12 +59,22 @@ export default function TaskCard({ idea, isDragging = false, onStatusChange }: T
         {...listeners}
         {...attributes}
         onClick={handleClick}
-        className={`idea p-3 bg-white shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-all cursor-pointer md:cursor-grab md:active:cursor-grabbing ${
-          isDragging ? 'opacity-50 rotate-3 scale-105 shadow-lg' : ''
-        }`}
+        className={`group idea p-3 bg-white shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-all cursor-pointer md:cursor-grab md:active:cursor-grabbing ${isDragging ? 'opacity-50 rotate-3 scale-105 shadow-lg' : ''
+          }`}
       >
-        <p className="text-sm text-gray-500 select-none">{idea.text}</p>
-        
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm text-gray-500 select-none flex-1">{idea.text}</p>
+
+          {/* Botón de eliminar */}
+          <button
+            onClick={handleDelete}
+            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 rounded transition-all flex-shrink-0"
+            title="Eliminar tarea"
+          >
+            <Trash2 className="h-3 w-3 text-red-500" />
+          </button>
+        </div>
+
         {/* Indicador visual para mobile */}
         <div className="md:hidden mt-2 flex items-center gap-1 text-xs text-gray-400">
           <span>Toca para mover</span>

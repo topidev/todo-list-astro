@@ -2,18 +2,20 @@ import type { Idea, Status } from "../../types/types"
 import Column from "../toDo/column"
 
 interface ColumType {
-    id: Status; 
+    id: Status;
     title: string;
     color: string
 }
 
 interface GridProps {
+    // grid: Array<{ id: Status; title: string; color: string }>
     grid: ColumType[]
     ideasList: Idea[]
     onStatusChange: (taskId: string, newStatus: string) => void
+    onDelete?: (taskId: string) => void
 }
 
-export default function ColumnGrid({ grid, ideasList, onStatusChange }: GridProps) {
+export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete }: GridProps) {
 
     // Filtrar ideas por status
     const getIdeasByStatus = (status: Status) => {
@@ -30,6 +32,7 @@ export default function ColumnGrid({ grid, ideasList, onStatusChange }: GridProp
                     color={column.color}
                     ideas={getIdeasByStatus(column.id)}
                     onStatusChange={onStatusChange}
+                    onDelete={onDelete}
                 />
             ))}
         </main>
