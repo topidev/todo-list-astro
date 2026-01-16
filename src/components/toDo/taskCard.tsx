@@ -1,7 +1,7 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { GripVertical, Trash2 } from 'lucide-react'
 import type { Idea } from '../../types/types'
 import StatusMenu from './statusMenu'
 
@@ -56,19 +56,30 @@ export default function TaskCard({
       <div
         ref={setNodeRef}
         style={style}
-        {...listeners}
-        {...attributes}
+        // {...listeners}
+        // {...attributes}
         onClick={handleClick}
-        className={`group idea p-3 bg-white shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-all cursor-pointer md:cursor-grab md:active:cursor-grabbing ${isDragging ? 'opacity-50 rotate-3 scale-105 shadow-lg' : ''
+        className={`group idea p-3 bg-white shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-all  ${isDragging ? 'cursor-grabbing opacity-50 rotate-3 scale-105 shadow-lg' : ''
           }`}
       >
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm text-gray-500 select-none flex-1">{idea.text}</p>
+        <div className="flex items-center justify-between gap-2">
+          {/* Drag handle - solo visible en desktop */}
+          <button
+            {...listeners}
+            {...attributes}
+            className="hidden md:flex opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-all flex-shrink-0"
+            title="Arrastrar"
+          >
+            <GripVertical className="h-4 w-4 text-gray-400" />
+          </button>
+
+          {/* Texto de la tarea */}
+          <p className="text-sm text-gray-600 select-none flex-1">{idea.text}</p>
 
           {/* Botón de eliminar */}
           <button
             onClick={handleDelete}
-            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 rounded transition-all flex-shrink-0"
+            className="opacity-0 relative z-10 group-hover:opacity-100 p-1 hover:bg-red-100 rounded transition-all flex-shrink-0"
             title="Eliminar tarea"
           >
             <Trash2 className="h-3 w-3 text-red-500" />

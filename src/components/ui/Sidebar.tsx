@@ -129,7 +129,6 @@ function SidebarContent({
                   'hover:bg-gray-100 bg-gray-300 border-gray-600'
                   }`}
                 onClick={() => {
-                  console.log("1 - Tablero Seleccionado: ", board.name)
                   onSelectBoard(board.id)
                 }}
               >
@@ -155,7 +154,7 @@ function SidebarContent({
         </div>
       )}
 
-      <div className="flex-1"></div>
+      <div className="flex-1 hidden md:block"></div>
 
       {/* Usuario */}
       {

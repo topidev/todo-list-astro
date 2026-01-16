@@ -27,7 +27,7 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
         <h2 className="text-sm text-gray-600 md:text-base lg:text-lg font-bold">
           {title}
         </h2>
-        <span className="text-xs bg-white px-2 py-1 rounded-full font-semibold">
+        <span className="text-xs bg-white px-2 py-1 text-gray-500 rounded-full font-semibold">
           {ideas.length}
         </span>
       </div>

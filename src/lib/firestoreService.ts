@@ -230,7 +230,6 @@ export function subscribeToTasks(
 
   const unsubscribe = onSnapshot(tasksRef, (snapshot) => {
     const tasks = snapshot.docs.map(doc => doc.data() as Idea)
-    console.log(tasks)
     callback(tasks)
   })
 
