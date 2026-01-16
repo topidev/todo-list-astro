@@ -128,7 +128,10 @@ function SidebarContent({
                   'bg-blue-100 border border-blue-300' :
                   'hover:bg-gray-100 bg-gray-300 border-gray-600'
                   }`}
-                onClick={() => onSelectBoard(board.id)}
+                onClick={() => {
+                  console.log("1 - Tablero Seleccionado: ", board.name)
+                  onSelectBoard(board.id)
+                }}
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-700 font-medium truncate">{board.name}</p>

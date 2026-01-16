@@ -10,6 +10,14 @@ import { useIsMobile } from "../../layouts/useMediaQuery"
 import { useBoard } from "../../hooks/useBoard"
 
 
+interface BoardProps {
+    tasks: Idea[]
+    loading: boolean
+    addTask: (text: string) => Promise<void>
+    updateStatus: (taskId: string, newStatus: Status) => Promise<void>
+    removeTask: (taskId: string) => Promise<void>
+}
+
 //- Arreglo para columnas dinamicas
 const COLUMNS: { id: Status; title: string; color: string }[] = [
     { id: 'new', title: 'Ideas', color: 'bg-blue-100 border-blue-200' },
@@ -20,7 +28,13 @@ const COLUMNS: { id: Status; title: string; color: string }[] = [
 ]
 
 
-export default function Board() {
+export default function Board({
+    tasks,
+    loading,
+    addTask,
+    updateStatus,
+    removeTask
+}: BoardProps) {
     // - Valor del input
     const [inputValue, setInputValue] = useState('')
     // - Revisar el inicio de sesión
@@ -30,9 +44,6 @@ export default function Board() {
 
     // - revisar si es mobile 
     const isMobile = useIsMobile()
-
-    // - FireBase Hook desde useBoard
-    const { tasks, loading, currentBoard, addTask, updateStatus, removeTask } = useBoard()
 
     // - Método para el enter en el input
     const handleEnter = async (e: React.KeyboardEvent) => {

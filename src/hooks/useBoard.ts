@@ -62,16 +62,13 @@ export function useBoard() {
     // Suscribirse a cambios en tiempo real de las tareas
     useEffect(() => {
         if (!currentBoard) {
-            console.log(currentBoard)
             setTasks([])
             return
         }
 
+
         const unsubscribe = subscribeToTasks(currentBoard.id, (updatedTasks) => {
-            if (updatedTasks.length > 0) {
-                setTasks(updatedTasks)
-            }
-            else setTasks([])
+            setTasks(updatedTasks)
         })
 
         return () => {
@@ -138,8 +135,11 @@ export function useBoard() {
     // Cambiar de board
     const switchBoard = (boardId: string) => {
         const board = boards.find(b => b.id === boardId)
+
         if (board) {
             setCurrentBoard(board)
+        } else {
+            console.log('❌ Board no encontrado en la lista')
         }
     }
 

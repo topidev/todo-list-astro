@@ -11,7 +11,11 @@ function AppContent() {
   const {
     boards,
     currentBoard,
+    tasks,
     loading: boardLoading,
+    addTask,
+    updateStatus,
+    removeTask,
     addBoard,
     switchBoard,
     removeBoard
@@ -55,7 +59,13 @@ function AppContent() {
                 </div>
               )}
 
-              <Board />
+              <Board
+                tasks={tasks}
+                loading={boardLoading}
+                addTask={addTask}
+                updateStatus={updateStatus}
+                removeTask={removeTask}
+              />
             </>
           ) : (
             <div className="flex flex-col items-center gap-6 py-12">
