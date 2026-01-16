@@ -100,7 +100,10 @@ function SidebarContent({
                 className="w-full px-2 py-1 text-gray-700 text-sm border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <div className="flex gap-1">
-                <button className="flex-1 flex text-white items-center justify-center gap-1 px-2 py-1 bg-blue-500 text white rounded text-sm hover:bg-blue-600 transition-colors">
+                <button
+                  className="flex-1 flex text-white items-center justify-center gap-1 px-2 py-1 bg-blue-500 text white rounded text-sm hover:bg-blue-600 transition-colors"
+                  onClick={() => handleCreateBoard()}
+                >
                   Crear
                 </button>
                 <button
@@ -123,12 +126,12 @@ function SidebarContent({
                 key={board.id}
                 className={`group flex itemes-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${currentBoard?.id === board.id ?
                   'bg-blue-100 border border-blue-300' :
-                  'hover:bg-gray-100'
+                  'hover:bg-gray-100 bg-gray-300 border-gray-600'
                   }`}
                 onClick={() => onSelectBoard(board.id)}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{board.name}</p>
+                  <p className="text-sm text-gray-700 font-medium truncate">{board.name}</p>
                   {board.owner === user?.uid && (
                     <p className="text-sm text-gray-500">Propiertario</p>
                   )}

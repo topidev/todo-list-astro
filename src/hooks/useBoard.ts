@@ -62,13 +62,16 @@ export function useBoard() {
     // Suscribirse a cambios en tiempo real de las tareas
     useEffect(() => {
         if (!currentBoard) {
+            console.log(currentBoard)
             setTasks([])
             return
         }
 
-
         const unsubscribe = subscribeToTasks(currentBoard.id, (updatedTasks) => {
-            setTasks(updatedTasks)
+            if (updatedTasks.length > 0) {
+                setTasks(updatedTasks)
+            }
+            else setTasks([])
         })
 
         return () => {
