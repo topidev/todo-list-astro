@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, Menu, Plus, Trash2, X } from 'lucide-react'
+import { Check, Menu, Plus, Share, Share2, Trash2, User, X } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { Button } from './button'
 import { Avatar, AvatarImage, AvatarFallback } from './avatar'
@@ -25,14 +25,19 @@ interface SideBarProps {
   onSelectBoard: (boardId: string) => void
   onCreateBoard: (name: string) => void
   onDeleteBoard?: (boardId: string) => void
+  onOpenModal: (open: boolean) => void
+  setOpenSheet?: (open: boolean) => void
 }
+
 
 function SidebarContent({
   boards,
   currentBoard,
   onSelectBoard,
   onCreateBoard,
-  onDeleteBoard
+  onDeleteBoard,
+  onOpenModal,
+  setOpenSheet
 }: SideBarProps) {
 
   const { user, signInWithGoogle, signOut } = useAuth()
@@ -46,6 +51,15 @@ function SidebarContent({
       onCreateBoard(newBoardName.trim())
       setNewBoardName('')
       setIsCreating(false)
+    }
+  }
+
+  const handleOpenShareModal = () => {
+    onOpenModal(true)
+    console.log("abriendo modal")
+    if (setOpenSheet) {
+      console.log("cerrando sideBar")
+      setOpenSheet(false)
     }
   }
 
@@ -75,7 +89,7 @@ function SidebarContent({
       {user && (
         <div className="flex-1 overflow-auto mb-4">
           <div className="flex items-center mt-4 justify-between mb-2">
-            <h2 className="text-sm font-semibold text-gray-600 uppercase">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase">
               Tableros
             </h2>
             <button
@@ -83,7 +97,7 @@ function SidebarContent({
               className=""
               title='Crear nuevo tablero'
             >
-              <Plus className='h-5 w-5 rounded transition-colors  hover:bg-gray-200 hover:text-gray-700' />
+              <Plus className='h-5 w-5 rounded transition-colors text-white hover:bg-gray-200 hover:text-gray-700' />
             </button>
           </div>
 
@@ -132,18 +146,27 @@ function SidebarContent({
                   onSelectBoard(board.id)
                 }}
               >
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 text-left min-w-0">
                   <p className="text-sm text-gray-700 font-medium truncate">{board.name}</p>
                   {board.owner === user?.uid && (
                     <p className="text-sm text-gray-500">Propiertario</p>
                   )}
                 </div>
 
+                {board.owner === user.uid && (
+                  <button
+                    title='Compartir tablero'
+                    onClick={handleOpenShareModal}
+                    className='opacity-0 group-hover:opacity-100 p-1 transition-all'
+                  >
+                    <Share2 className='h-4 w-4 text-blue-600' />
+                  </button>
+                )}
                 {board.owner === user?.uid && boards.length > 1 && (
                   <button
                     onClick={(e) => handleDeleteBoard(board.id, e)}
                     title='Eliminar Tablero'
-                    className="opacity-0 group-hover:opacity-100 p1 hover:bg-red-100 rounded transition-all">
+                    className="opacity-0 group-hover:opacity-100 p-1 transition-all">
                     <Trash2 className='h-4 w-4 text-red-500' />
                   </button>
                 )}
@@ -202,7 +225,7 @@ export default function Sidebar(props: SideBarProps) {
             size="icon"
             className="fixed-menu fixed top-4 left-4 z-20 md:hidden"
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-4 text-white w-4" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className='fixed-sidebar flex flex-col text-center'>
@@ -210,7 +233,7 @@ export default function Sidebar(props: SideBarProps) {
             <SheetTitle className='sidebar-title'>MENÚ</SheetTitle>
           </SheetHeader>
           <div className="mt-4 h-full">
-            <SidebarContent {...props} />
+            <SidebarContent {...props} setOpenSheet={setOpen} />
           </div>
         </SheetContent>
       </Sheet>

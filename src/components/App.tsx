@@ -4,9 +4,12 @@ import Board from './toDo/board'
 import Sidebar from './ui/Sidebar'
 import { Button } from './ui/button'
 import GoogleLogo from '../assets/icons8-google.svg'
+import UserModal from './ui/userModal'
+import { useState } from 'react'
 
 function AppContent() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth()
+  const [openModal, setOpenModal] = useState(false)
 
   const {
     boards,
@@ -42,6 +45,7 @@ function AppContent() {
         onSelectBoard={switchBoard}
         onCreateBoard={addBoard}
         onDeleteBoard={removeBoard}
+        onOpenModal={setOpenModal}
       />
       <div className="ml-0 md:ml-64 min-h-screen pt-16 md:pt-0">
         <div className="container mx-auto max-w-7xl py-8">
@@ -65,6 +69,10 @@ function AppContent() {
                 addTask={addTask}
                 updateStatus={updateStatus}
                 removeTask={removeTask}
+              />
+              <UserModal
+                open={openModal}
+                onOpenChange={setOpenModal}
               />
             </>
           ) : (

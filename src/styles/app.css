@@ -2,57 +2,79 @@ body {
     background-color: #212121;
 }
 
-p,h2,h1,h3,h4,h5,span,input {
-    color:#bababa;
+p,
+h2,
+h1,
+h3,
+h4,
+h5,
+span,
+input {
+    color: #bababa;
 }
 
-.fixed-sidebar, .fixed-menu, .floating-menu {
+.fixed-sidebar,
+.fixed-menu,
+.floating-menu {
     background-color: #333;
 }
 
 .floating-menu {
-    border:0;
-    padding:5px 0;
-    box-shadow: 0px 1px 4px 1px rgba(0,0,0, 0.4);
+    border: 0;
+    padding: 5px 0;
+    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, 0.4);
 }
 
-.floating-menu > div[role='menuitem'] {
+.floating-menu>div[role='menuitem'] {
     border-radius: 0;
 }
+
 .fixed-sidebar {
     border-right: 0;
 }
 
-.fixed-sidebar .sidebar-title { color:#dedede; }
+.fixed-sidebar .sidebar-title {
+    color: #dedede;
+}
 
 .fixed-menu {
-    border-color:#333;
+    border-color: #333;
 }
 
 .fixed-menu:hover {
     background-color: #414141;
 }
 
-.fixed-sidebar svg, .fixed-menu svg {
-    color:#dedede;
+.fixed-sidebar svg,
+.fixed-menu svg {
+    /* color:#dedede; */
 }
 
 /* board */
 
 .board-container {
-    margin:0 auto;
+    margin: 0 auto;
     max-width: 1500px;
 }
 
 div.state {
     width: 100%;
     padding: .5rem 1rem;
-    justify-content:flex-start;
+    justify-content: flex-start;
     border-bottom: 1px solid #414141;
 }
 
 input.activity {
     padding: .5rem 1rem;
-    border:1px solid #dedede;
+    border: 1px solid #dedede;
     background-color: #212121;
+}
+
+
+.user-dialog {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.user-dialog form {
+    box-shadow: 1px 2px 6px rgba(55, 100, 141, 0.4);
 }
