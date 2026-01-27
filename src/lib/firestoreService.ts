@@ -148,9 +148,34 @@ export async function deleteBoard(boardId: string, userId: string): Promise<void
 
 
 /**
+ * Quitar un miembro de un board
+ */
+export async function removeMemberFromBoard(
+  boardId: string,
+  userId: string
+): Promise<void> {
+  // 1. Quitar del board.members
+  const boardRef = doc(db, 'boards', boardId)
+  const boardSnap = await getDoc(boardRef)
+
+  if (!boardSnap.exists()) {
+    throw new Error('Board no encontrado')
+  }
+
+  const board = boardSnap.data() as Board
+
+  await updateDoc(boardRef, {
+    members: board.members.filter(id => id !== userId)
+  })
+
+  // 2. Quitar del user.boards
+  await removeUserBoard(userId, boardId)
+}
+
+/**
  * Remover un board de la lista de un usuario
   */
-async function removeUserBoard(userId: string, boardId: string): Promise<void> {
+export async function removeUserBoard(userId: string, boardId: string): Promise<void> {
   const userRef = doc(db, 'users', userId)
   const userSnap = await getDoc(userRef)
 
@@ -283,4 +308,28 @@ export async function createOrUpdateUser(
     },
     { merge: true } // merge: true para no sobrescribir el array de boards
   )
+}
+
+/**
+ * Obtener datos de múltiples usuarios por sus UIDs
+ */
+export async function getUsersByIds(userIds: string[]): Promise<UserData[]> {
+  if (userIds.length === 0) return []
+
+  // Firestore limita a 10 elementos en "in"
+  // Si tienes más de 10 miembros, necesitas hacer múltiples queries
+  const chunks = []
+  for (let i = 0; i < userIds.length; i += 10) {
+    chunks.push(userIds.slice(i, i + 10))
+  }
+
+  const usersPromises = chunks.map(async (chunk) => {
+    const usersRef = collection(db, 'users')
+    const q = query(usersRef, where('uid', 'in', chunk))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => doc.data() as UserData)
+  })
+
+  const usersArrays = await Promise.all(usersPromises)
+  return usersArrays.flat()
 }

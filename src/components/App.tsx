@@ -6,6 +6,7 @@ import { Button } from './ui/button'
 import GoogleLogo from '../assets/icons8-google.svg'
 import UserModal from './ui/userModal'
 import { useState } from 'react'
+import { Toaster } from 'react-hot-toast'
 
 function AppContent() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth()
@@ -101,6 +102,7 @@ export default function App() {
 
   return (
     <AuthProvider>
+      <Toaster position="bottom-right" />
       <AppContent />
     </AuthProvider>
   )
