@@ -7,6 +7,7 @@ import {
 import type { User } from 'firebase/auth'
 import type { ReactNode } from 'react'
 import { auth, googleProvider } from '../../lib/firebase'
+import { createOrUpdateUser } from "../../lib/firestoreService";
 
 interface AuthContextType {
     user: User | null
@@ -22,16 +23,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user)
+
+            if (user) {
+                try {
+                    await createOrUpdateUser(
+                        user.uid,
+                        user.email || '',
+                        user.displayName || 'Usuario',
+                        user.photoURL || undefined
+                    )
+                } catch (error) {
+                    console.log('Error guardando Usuario', error)
+                }
+            }
+
             setLoading(false)
         })
+
         return () => unsubscribe()
     }, [])
 
     const signInWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider)
+            const result = await signInWithPopup(auth, googleProvider)
+
+            await createOrUpdateUser(
+                result.user.uid,
+                result.user.email || '',
+                result.user.displayName || 'Usuario',
+                result.user.photoURL || undefined
+            )
+
         } catch (error) {
             console.error('Error al iniciar Sesion:', error)
         }
@@ -46,8 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{user, loading, signInWithGoogle, signOut}}>
-            { children }
+        <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+            {children}
         </AuthContext.Provider>
     )
 }

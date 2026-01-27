@@ -31,4 +31,5 @@ export interface UserData {
   displayName: string
   photoURL?: string
   boards: string[] // IDs de los boards a los que tiene acceso
+  updatedAt?: Date
 }

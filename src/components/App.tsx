@@ -73,6 +73,7 @@ function AppContent() {
               <UserModal
                 open={openModal}
                 onOpenChange={setOpenModal}
+                currentBoard={currentBoard}
               />
             </>
           ) : (

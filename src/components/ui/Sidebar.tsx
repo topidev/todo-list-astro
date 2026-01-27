@@ -153,7 +153,7 @@ function SidebarContent({
                   )}
                 </div>
 
-                {board.owner === user.uid && (
+                {board.owner === user.uid && board.id === currentBoard?.id && (
                   <button
                     title='Compartir tablero'
                     onClick={handleOpenShareModal}
@@ -162,7 +162,7 @@ function SidebarContent({
                     <Share2 className='h-4 w-4 text-blue-600' />
                   </button>
                 )}
-                {board.owner === user?.uid && boards.length > 1 && (
+                {board.owner === user?.uid && boards.length > 1 && board.id === currentBoard?.id && (
                   <button
                     onClick={(e) => handleDeleteBoard(board.id, e)}
                     title='Eliminar Tablero'

@@ -13,6 +13,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
+import type { UserData } from '../types/types'
 import type { Idea, Board, Status } from '../types/types'
 
 // ==================== BOARDS ====================
@@ -234,4 +235,52 @@ export function subscribeToTasks(
   })
 
   return unsubscribe
+}
+
+// ==================== USERS ====================
+
+/**
+ * Buscar un usuario por su email
+ */
+export async function getUserByEmail(email: string): Promise<UserData | null> {
+  try {
+    const usersRef = collection(db, 'users')
+    const q = query(usersRef, where('email', '==', email.toLowerCase().trim()))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+      return null
+    }
+
+    // Retornar el primer usuario encontrado
+    const userDoc = querySnapshot.docs[0]
+    return userDoc.data() as UserData
+  } catch (error) {
+    console.error('Error buscando usuario por email:', error)
+    throw error
+  }
+}
+
+/**
+ * Crear o actualizar el documento del usuario al hacer login
+ */
+export async function createOrUpdateUser(
+  uid: string,
+  email: string,
+  displayName: string,
+  photoURL?: string
+): Promise<void> {
+  const userRef = doc(db, 'users', uid)
+
+  await setDoc(
+    userRef,
+    {
+      uid,
+      email: email.toLowerCase(),
+      displayName,
+      photoURL: photoURL || null,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true } // merge: true para no sobrescribir el array de boards
+  )
 }
