@@ -5,9 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 import type { UserData, Board } from "../../types/types";
 import { setErrorMap } from "astro:schema";
 import { useAuth } from "../auth/AuthProvider";
-import { addMemberToBoard, removeMemberFromBoard, getUserByEmail, getUsersByIds } from "../../lib/firestoreService";
+import { addMemberToBoard, removeMemberFromBoard, getUserByEmail, getUsersByIds, getAllUsers } from "../../lib/firestoreService";
 import toast from "react-hot-toast";
 import MemberItem from "./memberItem";
+import { useDebounce } from 'use-debounce'
 
 export default function UserModal({
     open, onOpenChange, currentBoard
@@ -20,18 +21,47 @@ export default function UserModal({
     const [userEmail, setUserEmail] = useState('')
     const [loading, setLoading] = useState(false)
     const [members, setMembers] = useState<UserData[]>([])
+    const [debounceEmail] = useDebounce(userEmail, 500)
+    const [allUsers, setAllUsers] = useState<UserData[]>([])
+    const [suggestions, setSuggestions] = useState<UserData[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
 
-
+    // Eliminar scroll al abir el modal y buscar los usuarios
     useEffect(() => {
         if (open) {
             document.body.style.overflow = 'hidden'
             setUserEmail('')
+            
+            async function loadUsers() {
+                const users = await getAllUsers(30)
+                setAllUsers(users)
+            }
+            loadUsers()
         }
         else { document.body.style.overflow = 'unset' }
 
         return () => { document.body.style.overflow = 'unset' }
     }, [open])
 
+    // filtrar cuando cambie el email
+    useEffect(() => {
+        if (debounceEmail.length < 2) {
+            setSuggestions([])
+            setShowSuggestions(false)
+            return
+        }
+
+        const filtered = allUsers.filter(u => 
+            u.email.toLowerCase().includes(debounceEmail.toLocaleLowerCase()) ||
+            u.displayName.toLocaleLowerCase().includes(debounceEmail.toLocaleLowerCase())
+        ).slice(0, 5)
+
+        setSuggestions(filtered)
+        setShowSuggestions(true)
+
+    }, [debounceEmail, allUsers])
+
+    // Buscar miembros del tablero actuarl
     useEffect(() => {
         if (!currentBoard || !open) return
 
@@ -43,10 +73,10 @@ export default function UserModal({
         loadMembers()
     }, [currentBoard, open])
 
+    // handle submit del form
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        // Limpiar estados previos - ni se usan
         setLoading(false)
 
         if (!userEmail.trim()) {
@@ -99,19 +129,37 @@ export default function UserModal({
             setTimeout(() => {
                 onOpenChange(false)
             }, 2000);
+
         } catch (err) {
+
             console.log('Error compartiendo el tablero: ', err)
             toast.error('Error. Intentalo de nuevo')
+
         } finally {
+
             setLoading(false)
             toast.dismiss(loadingToast)
+
         }
     }
+
+    // handle evento onChange de input 
     const handleChange = (evnt: React.ChangeEvent<HTMLInputElement>) => {
         const email = evnt.target.value
         setUserEmail(email)
     }
+    
+    // handle evento onFocus de input 
+    const handleFocus = () => {
+        setShowSuggestions(suggestions.length > 0)
+    }
+    
+    // handle evento onBlur de input 
+    const handleBlur = () => {
+        setTimeout(() => setShowSuggestions(false), 200)
+    }
 
+    // handle quitar usuario de tablero
     const handleRemove = async (memberId: string) => {
 
         if (!memberId || !currentBoard.id) { return }
@@ -134,6 +182,7 @@ export default function UserModal({
 
         if (!currentBoard) { return null }
     }
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="user-dialog flex flex-col items-center justify-center text-center top-0 z-10 left-0 absolute p-2 w-full h-full">
@@ -143,7 +192,7 @@ export default function UserModal({
                         <Share2></Share2>
                     </DialogTitle>
                     <div className="flex flex-col justify-start items-center w-full gap-2">
-                        <div className="flex justify-start w-full items-start gap-2">
+                        <div className="relative flex justify-start w-full items-start gap-2">
                             {/* Input de email */}
                             <label className="text-white hidden text-sm sm:text-lg" htmlFor="inputemail">Correo: </label>
                             <input
@@ -151,11 +200,32 @@ export default function UserModal({
                                 id="inputemail"
                                 type="email"
                                 value={userEmail}
+                                onBlur={handleBlur}
+                                onFocus={handleFocus}
                                 onChange={handleChange}
                                 placeholder="someone@example.com"
                                 className=" w-full h-[36px] p-2 rounded border-1 text-white bg-slate-900">
 
                             </input>
+                            {showSuggestions && (
+                                <div className="absolute top-full w-full mt-1 bg-slate-800 border border-gray-600 rounded shadow-lg max-h-48 overflow-y-auto z-10">
+                                    {suggestions.map(user => (
+                                        <Button
+                                            key={user.uid}
+                                            onClick={() => {
+                                                setUserEmail(user.email)
+                                                setShowSuggestions(false)
+                                            }}
+                                            className="w-full p-2 hover:bg-slate-700 text-left flex items-center gap-2"
+                                        >
+                                            <div>
+                                                <p className="text-sm text-white">{user.displayName}</p>
+                                                <p className="text-xs text-gray-400">{user.email}</p>
+                                            </div>
+                                        </Button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div className="members-list bg-slate-800 p-4 rounded w-full my-4">

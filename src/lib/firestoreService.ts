@@ -11,6 +11,7 @@ import {
   onSnapshot,
   serverTimestamp,
   Timestamp,
+  limit,
 } from 'firebase/firestore'
 import { db } from './firebase'
 import type { UserData } from '../types/types'
@@ -356,4 +357,19 @@ export async function getUsersByIds(userIds: string[]): Promise<UserData[]> {
 
   const usersArrays = await Promise.all(usersPromises)
   return usersArrays.flat()
+}
+
+/**
+ * Obtener lista de usuarios (para autocompletar)
+ */
+export async function getAllUsers(limitCount: number = 50): Promise<UserData[]> {
+  try {
+    const usersRef = collection(db, 'users')
+    const q = query(usersRef, limit(limitCount))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => doc.data() as UserData)
+  } catch (error) {
+    console.error('Error obteniendo usuarios:', error)
+    return []
+  }
 }
