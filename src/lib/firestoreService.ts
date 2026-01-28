@@ -86,6 +86,30 @@ export async function addMemberToBoard(boardId: string, userId: string): Promise
 }
 
 /**
+ * Escuchar cambios en tiempo real de los boards de un usuario
+ */
+export function subscribeToUserBoards(
+  userId: string,
+  callback: (boards: Board[]) => void
+): () => void {
+  const boardsRef = collection(db, 'boards')
+  const q = query(boardsRef, where('members', 'array-contains', userId))
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      const userBoards = snapshot.docs.map(doc => doc.data() as Board)
+      callback(userBoards)
+    },
+    (error) => {
+      console.error('Error en listener de boards:', error)
+    }
+  )
+
+  return unsubscribe
+}
+
+/**
  * Actualizar la lista de boards de un usuario
  */
 async function updateUserBoards(userId: string, boardId: string): Promise<void> {

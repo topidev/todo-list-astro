@@ -8,8 +8,10 @@ import {
     deleteTask,
     deleteBoard,
     subscribeToTasks,
+    subscribeToUserBoards,
 } from '../lib/firestoreService'
 import type { Board, Idea, Status } from '../types/types'
+import { collection, query, where } from 'firebase/firestore'
 
 export function useBoard() {
     const { user } = useAuth()
@@ -27,37 +29,36 @@ export function useBoard() {
             setLoading(false)
             return
         }
+        // Susbribir el usuario a boards
+        const unsubscribe = subscribeToUserBoards(user.uid, (userBoards) => {
+            setBoards(userBoards)
 
-        async function loadBoards() {
-            try {
-                const userBoards = await getUserBoards(user.uid)
-                setBoards(userBoards)
-
-                // Si hay boards, seleccionar el primero por defecto
-                if (userBoards.length > 0) {
+            if (userBoards.length === 0) {
+                createDefaultBoard()
+            } else if (!currentBoard) {
+                setCurrentBoard(userBoards[0])
+            } else {
+                const stillExists = userBoards.find(b => b.id === currentBoard.id)
+                if (!stillExists) {
                     setCurrentBoard(userBoards[0])
                 } else {
-                    // Si no hay boards, crear uno por defecto
-                    const boardId = await createBoard(user.uid, 'Mi Tablero')
-                    const newBoard: Board = {
-                        id: boardId,
-                        name: 'Mi Tablero',
-                        owner: user.uid,
-                        members: [user.uid],
-                        createdAt: new Date(),
-                    }
-                    setBoards([newBoard])
-                    setCurrentBoard(newBoard)
+                    setCurrentBoard(stillExists)
                 }
-            } catch (error) {
-                console.error('Error cargando boards:', error)
-            } finally {
-                setLoading(false)
             }
-        }
+            setLoading(false)
+        })
 
-        loadBoards()
+        return () => {
+            unsubscribe()
+        }
+        
     }, [user])
+
+    async function createDefaultBoard() {
+        if (!user) return
+
+        const boardId = await createBoard(user.uid, 'Mi Tablero')
+    }
 
     // Suscribirse a cambios en tiempo real de las tareas
     useEffect(() => {
@@ -65,7 +66,6 @@ export function useBoard() {
             setTasks([])
             return
         }
-
 
         const unsubscribe = subscribeToTasks(currentBoard.id, (updatedTasks) => {
             setTasks(updatedTasks)
