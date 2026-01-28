@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import type { Idea } from '../../types/types'
 import TaskCard from './taskCard'
+import { useIsMobile } from '../../layouts/useMediaQuery'
 
 interface ColumnProps {
   id: string
@@ -15,6 +16,8 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
   const { setNodeRef, isOver } = useDroppable({
     id: id,
   })
+
+  const isMobile = useIsMobile()
 
   return (
     <div
@@ -36,8 +39,13 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
       <div className="list flex flex-col gap-2 flex-1 min-h-[100px]">
         {ideas.length === 0 ? (
           <p className="text-xs text-gray-400 text-center py-4">
-            Arrastra tareas aquí
-          </p>
+            {isMobile ? (
+                <span>No hay tareas</span>
+              ): (
+                <span>Arrastra tareas aquí</span>
+              )}
+            </p>
+
         ) : (
           ideas.map(idea => (
             <TaskCard
