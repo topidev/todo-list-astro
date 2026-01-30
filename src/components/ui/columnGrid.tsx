@@ -23,18 +23,31 @@ export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete }
     }
 
     return (
-        <main className="container-list w-full grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {grid.map(column => (
+        <main className="container-list w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {grid.slice(0, 4).map(column => (
                 <Column
-                    key={column.id}
-                    id={column.id}
-                    title={column.title}
-                    color={column.color}
-                    ideas={getIdeasByStatus(column.id)}
-                    onStatusChange={onStatusChange}
-                    onDelete={onDelete}
+                key={column.id}
+                id={column.id}
+                title={column.title}
+                color={column.color}
+                ideas={getIdeasByStatus(column.id)}
+                onStatusChange={onStatusChange}
+                onDelete={onDelete}
                 />
             ))}
+            
+            {/* Última columna separada con col-span completo */}
+            <div className="md:col-span-2 lg:col-span-4">
+                <Column
+                key={grid[4].id}
+                id={grid[4].id}
+                title={grid[4].title}
+                color={grid[4].color}
+                ideas={getIdeasByStatus(grid[4].id)}
+                onStatusChange={onStatusChange}
+                onDelete={onDelete}
+                />
+            </div>
         </main>
     )
 }

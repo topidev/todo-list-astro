@@ -7,10 +7,13 @@ import GoogleLogo from '../assets/icons8-google.svg'
 import UserModal from './ui/userModal'
 import { useState } from 'react'
 import { Toaster } from 'react-hot-toast'
+import { Edit } from 'lucide-react'
 
 function AppContent() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth()
   const [openModal, setOpenModal] = useState(false)
+  const [editName, setEditName] = useState(false)
+  const [newBoardName, setNewBoardName] = useState('')
 
   const {
     boards,
@@ -22,7 +25,8 @@ function AppContent() {
     removeTask,
     addBoard,
     switchBoard,
-    removeBoard
+    removeBoard,
+    updateName
   } = useBoard()
 
   if (authLoading || boardLoading) {
@@ -37,6 +41,29 @@ function AppContent() {
       </div>
     )
   }
+
+  const handleNewNameEnter = async (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && newBoardName.trim()) {
+      e.preventDefault()
+
+      if (newBoardName.trim() === currentBoard?.name) {
+        setEditName(false)
+        return
+      }
+
+      setNewBoardName(newBoardName.trim())
+      updateName(currentBoard?.id, newBoardName.trim())
+      setEditName(false)
+    }
+  }
+  
+  const handleBlur = async () => {
+    if (newBoardName.trim() && newBoardName.trim() !== currentBoard?.name) {
+      updateName(currentBoard?.id, newBoardName.trim())
+    }
+    setEditName(false)
+  }
+
 
   return (
     <>
@@ -55,8 +82,32 @@ function AppContent() {
               {/* header con el nombre del board actual */}
               {currentBoard && (
                 <div className="mb-6 px-4">
-                  <h1 className="text-2xl md:text-3xl font-bold text-blue-800">
-                    {currentBoard.name}
+                  <h1 className="group text-2xl gap-1 flex md:text-3xl font-bold text-blue-800">
+                    { editName ? (
+                      <input
+                        autoFocus
+                        type='text'
+                        value={newBoardName}
+                        onBlur={handleBlur}
+                        onKeyDown={handleNewNameEnter}
+                        onChange={e => setNewBoardName(e.target.value)}
+                        className='h-10 w-[300px] border-0 bg-white text-gray-800'
+                      >
+                      </input>
+                    ) : (
+                      <span>
+                        {currentBoard.name}
+                      </span>
+                    )}
+                    <Button
+                      onClick={() => {
+                        setNewBoardName(currentBoard.name)
+                        setEditName(true)
+                      }}
+                      className='opacity-0 -z-10 bg-transparent group-hover:bg-transparent hover:cursor-pointer group-hover:opacity-100 group-hover:z-0 transition-all'
+                    >
+                      <Edit className='h-4 w-4 text-white'></Edit>
+                    </Button>
                   </h1>
                   {/* <p className="text-sm text-gray-500 mt-1">
                     {boards.length} {boards.length === 1 ? 'tablero' : 'tableros'} total

@@ -64,6 +64,35 @@ export async function getUserBoards(userId: string): Promise<Board[]> {
 }
 
 /**
+ * Actualizar un board (genérico para cualquier campo)
+ */
+export async function updateBoard(
+  boardId: string,
+  updates: Partial<Board>
+): Promise<void> {
+  const boardRef = doc(db, 'boards', boardId)
+  
+  await updateDoc(boardRef, {
+    ...updates,
+    updatedAt: serverTimestamp(), // Opcional: llevar registro de cuándo se actualizó
+  })
+}
+
+/**
+ * Actualizar solo el nombre del board (helper específico)
+ */
+export async function updateBoardName(
+  boardId: string,
+  newName: string
+): Promise<void> {
+  if (!newName.trim()) {
+    throw new Error('El nombre no puede estar vacío')
+  }
+
+  await updateBoard(boardId, { name: newName.trim() })
+}
+
+/**
  * Agregar un miembro a un board
  */
 export async function addMemberToBoard(boardId: string, userId: string): Promise<void> {

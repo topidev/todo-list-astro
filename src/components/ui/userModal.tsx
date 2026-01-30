@@ -14,7 +14,7 @@ export default function UserModal({
     open, onOpenChange, currentBoard
 }: {
     open: boolean,
-    currentBoard: Board
+    currentBoard: Board | null
     onOpenChange: (open: boolean) => void
 }) {
     const { user } = useAuth()
@@ -66,8 +66,10 @@ export default function UserModal({
         if (!currentBoard || !open) return
 
         async function loadMembers() {
-            const data = await getUsersByIds(currentBoard.members)
-            setMembers(data)
+            if (currentBoard) {
+                const data = await getUsersByIds(currentBoard.members)
+                setMembers(data)
+            }
         }
 
         loadMembers()
@@ -162,20 +164,22 @@ export default function UserModal({
     // handle quitar usuario de tablero
     const handleRemove = async (memberId: string) => {
 
-        if (!memberId || !currentBoard.id) { return }
+        if (!memberId || !currentBoard) { return }
 
         if (!confirm('¿Quitar este usuario del tablero?')) return
 
         try {
-            await removeMemberFromBoard(currentBoard.id, memberId)
+            if (currentBoard) {
+                await removeMemberFromBoard(currentBoard.id, memberId)
 
-            const updateMembers = await getUsersByIds(
-                currentBoard.members.filter(id => id !== memberId)
-            )
+                const updateMembers = await getUsersByIds(
+                    currentBoard.members.filter(id => id !== memberId)
+                )
 
-            setMembers(updateMembers)
+                setMembers(updateMembers)
 
-            toast.success('Usuario Eliminado')
+                toast.success('Usuario Eliminado')
+            }
         } catch (err) {
             toast.error('No se pudo borrar el usuario')
         }
@@ -233,8 +237,8 @@ export default function UserModal({
                             {members.map(member => (
                                 <MemberItem
                                     member={member}
-                                    isOwner={user?.uid === currentBoard.owner}
-                                    canRemove={currentBoard.owner !== member.uid}
+                                    isOwner={user?.uid === currentBoard?.owner}
+                                    canRemove={currentBoard?.owner !== member.uid}
                                     key={member.uid}
                                     onRemove={handleRemove}
                                 >

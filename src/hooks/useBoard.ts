@@ -9,9 +9,11 @@ import {
     deleteBoard,
     subscribeToTasks,
     subscribeToUserBoards,
+    updateBoardName,
 } from '../lib/firestoreService'
 import type { Board, Idea, Status } from '../types/types'
 import { collection, query, where } from 'firebase/firestore'
+import toast from 'react-hot-toast'
 
 export function useBoard() {
     const { user } = useAuth()
@@ -164,6 +166,16 @@ export function useBoard() {
         }
     }
 
+    //Actualizar nombre del board
+    const updateName = async (boardId: string | any, boardName: string) => {
+        try {
+            await updateBoardName(boardId, boardName)
+            toast.success('Nombre actualizado')
+        } catch (error) {
+            toast.error('No se pudo actualizar el nombre')
+        }
+    }
+
     return {
         boards,
         currentBoard,
@@ -174,6 +186,7 @@ export function useBoard() {
         removeTask,
         addBoard,
         switchBoard,
-        removeBoard
+        removeBoard,
+        updateName
     }
 }
