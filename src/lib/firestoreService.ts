@@ -22,16 +22,22 @@ import type { Idea, Board, Status } from '../types/types'
 /**
  * Crear un nuevo board
  */
-export async function createBoard(userId: string, boardName: string): Promise<string> {
+export async function createBoard(
+  userId: string,
+  name: string,
+  color?: string
+): Promise<string> {
   const boardRef = doc(collection(db, 'boards'))
   const boardId = boardRef.id
 
   await setDoc(boardRef, {
     id: boardId,
-    name: boardName,
+    name: name,
     owner: userId,
     members: [userId], // El creador es el primer miembro
+    color: color || 'blue',
     createdAt: serverTimestamp(),
+
   })
 
   // Agregar el board al usuario
@@ -71,7 +77,7 @@ export async function updateBoard(
   updates: Partial<Board>
 ): Promise<void> {
   const boardRef = doc(db, 'boards', boardId)
-  
+
   await updateDoc(boardRef, {
     ...updates,
     updatedAt: serverTimestamp(), // Opcional: llevar registro de cuándo se actualizó

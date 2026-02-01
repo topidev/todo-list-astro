@@ -28,7 +28,7 @@ const COLUMNS: { id: Status; title: string; color: string }[] = [
 ]
 
 
-export default function Board({
+export default function Tablero({
     tasks,
     loading,
     addTask,

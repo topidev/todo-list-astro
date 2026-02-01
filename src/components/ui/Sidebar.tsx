@@ -17,13 +17,15 @@ import {
   DropdownMenuTrigger,
 } from './dropdown-menu'
 import GoogleLogo from '../../assets/icons8-google.svg'
+import type { Board } from '../../types/types'
 
 
 interface SideBarProps {
   boards: Array<{ id: string; name: string; owner: string }>
   currentBoard: { id: string; name: string; owner: string } | null
   onSelectBoard: (boardId: string) => void
-  onCreateBoard: (name: string) => void
+  onCreateBoard: () => void
+  onEditBoard: (board: Board) => void
   onDeleteBoard?: (boardId: string) => void
   onOpenModal: (open: boolean) => void
   setOpenSheet?: (open: boolean) => void
@@ -35,30 +37,33 @@ function SidebarContent({
   currentBoard,
   onSelectBoard,
   onCreateBoard,
+  onEditBoard,
   onDeleteBoard,
   onOpenModal,
   setOpenSheet
 }: SideBarProps) {
 
   const { user, signInWithGoogle, signOut } = useAuth()
-  const [isCreating, setIsCreating] = useState(false)
-  const [newBoardName, setNewBoardName] = useState('')
-
-  const userName = user?.displayName ? user.displayName.split(' ')[0] : ''
+  const [openMiniMenu, setOpenMiniMenu] = useState(false)
 
   const handleCreateBoard = () => {
-    if (newBoardName.trim()) {
-      onCreateBoard(newBoardName.trim())
-      setNewBoardName('')
-      setIsCreating(false)
-    }
+    onCreateBoard()
+    if (setOpenSheet) { setOpenSheet(false) }
   }
 
   const handleOpenShareModal = () => {
     onOpenModal(true)
-    console.log("abriendo modal")
+    setOpenMiniMenu(false)
     if (setOpenSheet) {
-      console.log("cerrando sideBar")
+      setOpenSheet(false)
+    }
+  }
+
+  const handleEditBoard = (board: any, e: React.MouseEvent) => {
+    e.stopPropagation()
+    onEditBoard(board)
+    setOpenMiniMenu(false)
+    if (setOpenSheet) {
       setOpenSheet(false)
     }
   }
@@ -93,45 +98,13 @@ function SidebarContent({
               Tableros
             </h2>
             <button
-              onClick={() => setIsCreating(true)}
+              onClick={handleCreateBoard}
               className=""
               title='Crear nuevo tablero'
             >
               <Plus className='h-5 w-5 rounded transition-colors text-white hover:bg-gray-200 hover:text-gray-700' />
             </button>
           </div>
-
-          {/* Crear Formulario del Tablero */}
-          {isCreating && (
-            <div className="mb-2 p-2 bg-white border rounded-lg">
-              <input
-                autoFocus
-                type="text"
-                value={newBoardName}
-                placeholder='Nombre del Tablero'
-                onChange={(e) => setNewBoardName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
-                className="w-full px-2 py-1 text-gray-700 text-sm border rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <div className="flex gap-1">
-                <button
-                  className="flex-1 flex text-white items-center justify-center gap-1 px-2 py-1 bg-blue-500 text white rounded text-sm hover:bg-blue-600 transition-colors"
-                  onClick={() => handleCreateBoard()}
-                >
-                  Crear
-                </button>
-                <button
-                  onClick={() => {
-                    setIsCreating(false)
-                    setNewBoardName('')
-                  }}
-                  className="flex-1 flex text-gray-800 items-center justify-center gap-1 px-2 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300 transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* lista de tableros */}
           <div className="space-y-1">
@@ -142,21 +115,25 @@ function SidebarContent({
                   'bg-blue-100 border border-blue-300' :
                   'hover:bg-gray-100 bg-gray-300 border-gray-600'
                   }`}
-                onClick={() => {
-                  onSelectBoard(board.id)
-                }}
+                onClick={() => onSelectBoard(board.id)}
               >
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm text-gray-700 font-medium truncate">{board.name}</p>
-                  {board.owner === user?.uid && (
-                    <p className="text-sm text-gray-500">Propietario</p>
-                  )}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className={`w-3 h-3 rounded-full ${board.color || 'bg-gray-500'} flex-shrink-0`} />
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-sm text-gray-700 font-medium truncate">{board.name}</p>
+                    {board.owner === user?.uid && (
+                      <p className="text-xs text-gray-500">Propietario</p>
+                    )}
+                  </div>
                 </div>
                 {board.owner === user.uid && board.id === currentBoard?.id && (
-                  <DropdownMenu>
+                  <DropdownMenu open={openMiniMenu} onOpenChange={setOpenMiniMenu}>
                     <DropdownMenuTrigger asChild>
                       <button>
-                        <EllipsisVertical className='h-4 w-4'>
+                        <EllipsisVertical
+                          className='h-4 w-4'
+                          onClick={() => setOpenMiniMenu(true)}
+                        >
                         </EllipsisVertical>
                       </button>
                     </DropdownMenuTrigger>
@@ -164,7 +141,7 @@ function SidebarContent({
                       <DropdownMenuItem className='p-0 hover:!bg-gray-800'>
                         <button
                           title='Compartir tablero'
-                          // onClick={handleOpenShareModal}
+                          onClick={(e) => handleEditBoard(board, e)}
                           className='w-full flex bg-transparent justify-between items-center px-3 py-2 transition-all hover:bg-gray-800'
                         >
                           <span>Editar</span>
@@ -174,7 +151,10 @@ function SidebarContent({
                       <DropdownMenuItem className='p-0 hover:!bg-gray-800'>
                         <button
                           title='Compartir tablero'
-                          onClick={handleOpenShareModal}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleOpenShareModal()
+                          }}
                           className='w-full flex bg-transparent justify-between items-center px-3 py-2 transition-all hover:bg-gray-800'
                         >
                           <span>Compartir</span>

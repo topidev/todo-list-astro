@@ -1,6 +1,6 @@
 import { useBoard } from '../hooks/useBoard'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
-import Board from './toDo/board'
+import Tablero from './toDo/board'
 import Sidebar from './ui/Sidebar'
 import { Button } from './ui/button'
 import GoogleLogo from '../assets/icons8-google.svg'
@@ -8,12 +8,19 @@ import UserModal from './ui/userModal'
 import { useState } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { Edit } from 'lucide-react'
+import BoardFormModal, { type BoardFormData } from './ui/BoardFormModal'
+import type { Board } from '../types/types'
 
 function AppContent() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth()
   const [openModal, setOpenModal] = useState(false)
   const [editName, setEditName] = useState(false)
   const [newBoardName, setNewBoardName] = useState('')
+
+  const [openShareModal, setOpenShareModal] = useState(false)
+  const [openBoardFormModal, setOpenBoardFormModal] = useState(false)
+  const [boardFormMode, setBoardFormMode] = useState<'create' | 'edit'>('create')
+  const [boardToEdit, setBoardToEdit] = useState<Board | null>(null)
 
   const {
     boards,
@@ -26,7 +33,8 @@ function AppContent() {
     addBoard,
     switchBoard,
     removeBoard,
-    updateName
+    updateName,
+    updateBoardDetails
   } = useBoard()
 
   if (authLoading || boardLoading) {
@@ -42,26 +50,27 @@ function AppContent() {
     )
   }
 
-  const handleNewNameEnter = async (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newBoardName.trim()) {
-      e.preventDefault()
-
-      if (newBoardName.trim() === currentBoard?.name) {
-        setEditName(false)
-        return
-      }
-
-      setNewBoardName(newBoardName.trim())
-      updateName(currentBoard?.id, newBoardName.trim())
-      setEditName(false)
-    }
+  // Handler para crear board
+  const handleOpenCreateBoard = () => {
+    setBoardFormMode('create')
+    setBoardToEdit(null)
+    setOpenBoardFormModal(true)
   }
 
-  const handleBlur = async () => {
-    if (newBoardName.trim() && newBoardName.trim() !== currentBoard?.name) {
-      updateName(currentBoard?.id, newBoardName.trim())
+  // Handler para editar board
+  const handleOpenEditBoard = (board: Board) => {
+    setBoardFormMode('edit')
+    setBoardToEdit(board)
+    setOpenBoardFormModal(true)
+  }
+
+  // Handler del submit del formulario
+  const handleBoardFormSubmit = async (data: BoardFormData) => {
+    if (boardFormMode === 'create') {
+      await addBoard(data.name, data.color)
+    } else if (boardToEdit) {
+      await updateBoardDetails(boardToEdit.id, data.name, data.color)
     }
-    setEditName(false)
   }
 
 
@@ -71,7 +80,8 @@ function AppContent() {
         boards={boards}
         currentBoard={currentBoard}
         onSelectBoard={switchBoard}
-        onCreateBoard={addBoard}
+        onCreateBoard={handleOpenCreateBoard}
+        onEditBoard={handleOpenEditBoard}
         onDeleteBoard={removeBoard}
         onOpenModal={setOpenModal}
       />
@@ -83,31 +93,11 @@ function AppContent() {
               {currentBoard && (
                 <div className="mb-6 px-4">
                   <h1 className="group text-2xl gap-1 flex md:text-3xl lg:text-4xl font-bold text-blue-800">
-                    {editName ? (
-                      <input
-                        autoFocus
-                        type='text'
-                        value={newBoardName}
-                        onBlur={handleBlur}
-                        onKeyDown={handleNewNameEnter}
-                        onChange={e => setNewBoardName(e.target.value)}
-                        className='h-10 w-[300px] border-0 bg-white text-gray-800'
-                      >
-                      </input>
-                    ) : (
-                      <span>
-                        {currentBoard.name}
-                      </span>
-                    )}
-                    <Button
-                      onClick={() => {
-                        setNewBoardName(currentBoard.name)
-                        setEditName(true)
-                      }}
-                      className='opacity-0 -z-10 bg-transparent group-hover:bg-transparent hover:cursor-pointer group-hover:opacity-100 group-hover:z-0 transition-all'
-                    >
-                      <Edit className='h-4 w-4 text-white'></Edit>
-                    </Button>
+
+                    <span>
+                      {currentBoard.name}
+                    </span>
+
                   </h1>
                   {/* <p className="text-sm text-gray-500 mt-1">
                     {boards.length} {boards.length === 1 ? 'tablero' : 'tableros'} total
@@ -115,7 +105,7 @@ function AppContent() {
                 </div>
               )}
 
-              <Board
+              <Tablero
                 tasks={tasks}
                 loading={boardLoading}
                 addTask={addTask}
@@ -126,6 +116,13 @@ function AppContent() {
                 open={openModal}
                 onOpenChange={setOpenModal}
                 currentBoard={currentBoard}
+              />
+              <BoardFormModal
+                open={openBoardFormModal}
+                onOpenChange={setOpenBoardFormModal}
+                onSubmit={handleBoardFormSubmit}
+                board={boardToEdit}
+                mode={boardFormMode}
               />
             </>
           ) : (

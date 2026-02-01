@@ -20,6 +20,7 @@ export interface Idea {
 export interface Board {
   id: string
   name: string
+  color?: string
   owner: string // userId del creador
   members: string[] // array de userIds con acceso
   createdAt: Timestamp | Date
