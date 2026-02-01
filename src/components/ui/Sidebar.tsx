@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, Menu, Plus, Share, Share2, Trash2, User, X } from 'lucide-react'
+import { Check, Edit2, EllipsisVertical, Menu, PencilLine, Plus, Share, Share2, Trash2, User, X } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { Button } from './button'
 import { Avatar, AvatarImage, AvatarFallback } from './avatar'
@@ -138,7 +138,7 @@ function SidebarContent({
             {boards.map(board => (
               <div
                 key={board.id}
-                className={`group flex itemes-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${currentBoard?.id === board.id ?
+                className={`flex itemes-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${currentBoard?.id === board.id ?
                   'bg-blue-100 border border-blue-300' :
                   'hover:bg-gray-100 bg-gray-300 border-gray-600'
                   }`}
@@ -149,26 +149,52 @@ function SidebarContent({
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-sm text-gray-700 font-medium truncate">{board.name}</p>
                   {board.owner === user?.uid && (
-                    <p className="text-sm text-gray-500">Propiertario</p>
+                    <p className="text-sm text-gray-500">Propietario</p>
                   )}
                 </div>
-
                 {board.owner === user.uid && board.id === currentBoard?.id && (
-                  <button
-                    title='Compartir tablero'
-                    onClick={handleOpenShareModal}
-                    className='opacity-0 group-hover:opacity-100 p-1 transition-all'
-                  >
-                    <Share2 className='h-4 w-4 text-blue-600' />
-                  </button>
-                )}
-                {board.owner === user?.uid && boards.length > 1 && board.id === currentBoard?.id && (
-                  <button
-                    onClick={(e) => handleDeleteBoard(board.id, e)}
-                    title='Eliminar Tablero'
-                    className="opacity-0 group-hover:opacity-100 p-1 transition-all">
-                    <Trash2 className='h-4 w-4 text-red-500' />
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button>
+                        <EllipsisVertical className='h-4 w-4'>
+                        </EllipsisVertical>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className='floating-menu'>
+                      <DropdownMenuItem className='p-0 hover:!bg-gray-800'>
+                        <button
+                          title='Compartir tablero'
+                          // onClick={handleOpenShareModal}
+                          className='w-full flex bg-transparent justify-between items-center px-3 py-2 transition-all hover:bg-gray-800'
+                        >
+                          <span>Editar</span>
+                          <PencilLine className='h-4 w-4 text-gray-400' />
+                        </button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className='p-0 hover:!bg-gray-800'>
+                        <button
+                          title='Compartir tablero'
+                          onClick={handleOpenShareModal}
+                          className='w-full flex bg-transparent justify-between items-center px-3 py-2 transition-all hover:bg-gray-800'
+                        >
+                          <span>Compartir</span>
+                          <Share2 className='h-4 w-4 text-blue-600' />
+                        </button>
+                      </DropdownMenuItem>
+                      {boards.length > 1 && (
+                        <DropdownMenuItem className='p-0 hover:!bg-gray-800'>
+                          <button
+                            onClick={(e) => handleDeleteBoard(board.id, e)}
+                            title='Eliminar Tablero'
+                            className='w-full flex justify-between items-center px-3 py-2 transition-all hover:bg-gray-800'
+                          >
+                            <span>Eliminar</span>
+                            <Trash2 className='h-4 w-4 text-red-500' />
+                          </button>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
 
               </div>

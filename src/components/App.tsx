@@ -56,7 +56,7 @@ function AppContent() {
       setEditName(false)
     }
   }
-  
+
   const handleBlur = async () => {
     if (newBoardName.trim() && newBoardName.trim() !== currentBoard?.name) {
       updateName(currentBoard?.id, newBoardName.trim())
@@ -82,8 +82,8 @@ function AppContent() {
               {/* header con el nombre del board actual */}
               {currentBoard && (
                 <div className="mb-6 px-4">
-                  <h1 className="group text-2xl gap-1 flex md:text-3xl font-bold text-blue-800">
-                    { editName ? (
+                  <h1 className="group text-2xl gap-1 flex md:text-3xl lg:text-4xl font-bold text-blue-800">
+                    {editName ? (
                       <input
                         autoFocus
                         type='text'
