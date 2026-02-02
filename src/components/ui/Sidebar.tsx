@@ -52,25 +52,37 @@ function SidebarContent({
   }
 
   const handleOpenShareModal = () => {
-    onOpenModal(true)
     setOpenMiniMenu(false)
-    if (setOpenSheet) {
-      setOpenSheet(false)
-    }
+
+    setTimeout(() => {
+
+      onOpenModal(true)
+
+      if (setOpenSheet) {
+        console.log("cerrando sideBar")
+        setOpenSheet(false)
+      }
+
+    }, 100);
   }
 
-  const handleEditBoard = (board: any, e: React.MouseEvent) => {
-    e.stopPropagation()
-    onEditBoard(board)
+  const handleEditBoard = (board: any) => {
     setOpenMiniMenu(false)
-    if (setOpenSheet) {
-      setOpenSheet(false)
-    }
+
+    setTimeout(() => {
+
+      onEditBoard(board)
+
+      if (setOpenSheet) {
+        setOpenSheet(false)
+      }
+
+    }, 100);
   }
 
   const handleDeleteBoard = (boardId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-
+    setOpenMiniMenu(false)
     if (boards.length === 1) {
       alert('No puedes eliminar tu unico tablero')
       return
@@ -138,23 +150,30 @@ function SidebarContent({
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className='floating-menu'>
-                      <DropdownMenuItem className='p-0 hover:!bg-gray-800'>
+                      <DropdownMenuItem
+                        className='p-0 hover:!bg-gray-800'
+                        onSelect={(e) => {
+                          e.preventDefault()
+                          handleEditBoard(board)
+                        }}
+                      >
                         <button
                           title='Compartir tablero'
-                          onClick={(e) => handleEditBoard(board, e)}
                           className='w-full flex bg-transparent justify-between items-center px-3 py-2 transition-all hover:bg-gray-800'
                         >
                           <span>Editar</span>
                           <PencilLine className='h-4 w-4 text-gray-400' />
                         </button>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className='p-0 hover:!bg-gray-800'>
+                      <DropdownMenuItem
+                        className='p-0 hover:!bg-gray-800'
+                        onSelect={(e) => {
+                          e.preventDefault()
+                          handleOpenShareModal()
+                        }}
+                      >
                         <button
                           title='Compartir tablero'
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleOpenShareModal()
-                          }}
                           className='w-full flex bg-transparent justify-between items-center px-3 py-2 transition-all hover:bg-gray-800'
                         >
                           <span>Compartir</span>
