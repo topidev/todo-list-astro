@@ -10,6 +10,7 @@ interface TaskCardProps {
   isDragging?: boolean
   onStatusChange?: (taskId: string, newStatus: string) => void
   onDelete?: (taskId: string) => void
+  onEdit?: (task: Idea) => void
 }
 
 export default function TaskCard({

@@ -257,7 +257,9 @@ export async function removeUserBoard(userId: string, boardId: string): Promise<
 export async function createTask(
   boardId: string,
   text: string,
-  userId: string
+  userId: string,
+  description?: string,    // ← Agregar
+  dueDate?: Date           // ← Agregar
 ): Promise<string> {
   const taskRef = doc(collection(db, 'boards', boardId, 'tasks'))
   const taskId = taskRef.id
@@ -265,6 +267,8 @@ export async function createTask(
   await setDoc(taskRef, {
     id: taskId,
     text,
+    description: description || null,  // ← Agregar
+    dueDate: dueDate || null,          // ← Agregar
     status: 'new',
     createdAt: serverTimestamp(),
     createdBy: userId,
@@ -272,6 +276,19 @@ export async function createTask(
 
   return taskId
 }
+
+/**
+ * Actualizar una tarea completa
+ */
+export async function updateTask(
+  boardId: string,
+  taskId: string,
+  updates: Partial<Idea>
+): Promise<void> {
+  const taskRef = doc(db, 'boards', boardId, 'tasks', taskId)
+  await updateDoc(taskRef, updates)
+}
+
 
 /**
  * Obtener todas las tareas de un board

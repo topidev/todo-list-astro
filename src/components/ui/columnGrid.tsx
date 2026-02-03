@@ -11,11 +11,12 @@ interface GridProps {
     // grid: Array<{ id: Status; title: string; color: string }>
     grid: ColumType[]
     ideasList: Idea[]
+    onEdit: (task: Idea) => void
     onStatusChange: (taskId: string, newStatus: string) => void
     onDelete?: (taskId: string) => void
 }
 
-export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete }: GridProps) {
+export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete, onEdit }: GridProps) {
 
     // Filtrar ideas por status
     const getIdeasByStatus = (status: Status) => {
@@ -33,6 +34,7 @@ export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete }
                     ideas={getIdeasByStatus(column.id)}
                     onStatusChange={onStatusChange}
                     onDelete={onDelete}
+                    onEdit={onEdit}
                 />
             ))}
 
@@ -46,6 +48,7 @@ export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete }
                     ideas={getIdeasByStatus(grid[4].id)}
                     onStatusChange={onStatusChange}
                     onDelete={onDelete}
+                    onEdit={onEdit}
                 />
             </div>
         </main>

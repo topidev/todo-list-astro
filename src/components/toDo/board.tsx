@@ -8,12 +8,14 @@ import ColumnGrid from "../ui/columnGrid"
 import IdeaInput from "../ui/inputTask"
 import { useIsMobile } from "../../layouts/useMediaQuery"
 import { useBoard } from "../../hooks/useBoard"
+import TaskFormModal, { type TaskFormData } from "../ui/taskFormModal"
+import { updateTask } from "../../lib/firestoreService"
 
 
 interface BoardProps {
     tasks: Idea[]
     loading: boolean
-    addTask: (text: string) => Promise<void>
+    addTask: (text: string, description: string | undefined, dueDate: Date | undefined) => Promise<void>
     updateStatus: (taskId: string, newStatus: Status) => Promise<void>
     removeTask: (taskId: string) => Promise<void>
 }
@@ -45,14 +47,46 @@ export default function Tablero({
     // - revisar si es mobile 
     const isMobile = useIsMobile()
 
+    // - Estados para el modal de tareas
+    const [taskFormOpen, setTaskFormOpen] = useState(false)
+    const [taskInitialText, setTaskInitialText] = useState('')
+    const [taskToEdit, setTaskToEdit] = useState<Idea | null>(null)
+    const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit'>('create')
+
     // - Método para el enter en el input
     const handleEnter = async (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && inputValue.trim()) {
             e.preventDefault()
 
-            await addTask(inputValue.trim())
+            setTaskInitialText(inputValue.trim())
+            setTaskFormMode('create')
+            setTaskToEdit(null)
+            setTaskFormOpen(true)
+
+
             setInputValue('')
         }
+    }
+
+
+    // - Función para el submit del Modal
+    const handleTaskFormSubmit = async (data: TaskFormData) => {
+        if (taskFormMode === 'create') {
+            await addTask(data.text, data.description, data.dueDate)
+        } else if (taskToEdit) {
+            const boardId = useBoard().currentBoard?.id
+            console.log(boardId)
+            if (boardId) {
+                await updateTask(boardId, taskToEdit.id, data)
+            }
+        }
+    }
+
+    // Funcion para abrir edición (lo usaremos después en TaskCard)
+    const handleOpenEditTask = (task: Idea) => {
+        setTaskFormMode('edit')
+        setTaskToEdit(task)
+        setTaskFormOpen(true)
     }
 
     const handleDragStart = (event: DragStartEvent) => {
@@ -117,6 +151,17 @@ export default function Tablero({
                 ideasList={tasks}
                 onStatusChange={handleStatusChange}
                 onDelete={removeTask}
+                onEdit={handleOpenEditTask}
+            />
+
+            {/* Modal de crear/editar tarea */}
+            <TaskFormModal
+                open={taskFormOpen}
+                onOpenModal={setTaskFormOpen}
+                onSubmit={handleTaskFormSubmit}
+                task={taskToEdit}
+                initialText={taskInitialText}
+                mode={taskFormMode}
             />
         </div>
     )

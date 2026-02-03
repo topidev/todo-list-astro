@@ -11,10 +11,12 @@ import {
     subscribeToUserBoards,
     updateBoardName,
     updateBoard,
+    updateTask as updateTaskFirestore
 } from '../lib/firestoreService'
 import type { Board, Idea, Status } from '../types/types'
 import { collection, query, where } from 'firebase/firestore'
 import toast from 'react-hot-toast'
+import type { TaskFormData } from '../components/ui/taskFormModal'
 
 export function useBoard() {
     const { user } = useAuth()
@@ -103,14 +105,31 @@ export function useBoard() {
     }, [currentBoard?.id])
 
     // Agregar tarea
-    const addTask = async (text: string) => {
+    const addTask = async (text: string, desc?: string, dueDate?: Date) => {
         if (!currentBoard || !user) return
 
         try {
-            await createTask(currentBoard.id, text, user.uid)
+            await createTask(currentBoard.id, text, user.uid, desc, dueDate)
             // El listener actualizará automáticamente las tareas
         } catch (error) {
             console.error('Error agregando tarea:', error)
+        }
+    }
+
+    // Agregar updateTask
+    const updateTask = async (taskId: string, data: TaskFormData) => {
+        if (!currentBoard) return
+
+        try {
+            await updateTaskFirestore(currentBoard.id, taskId, {
+                text: data.text,
+                description: data.description,
+                dueDate: data.dueDate,
+            })
+            toast.success('Tarea actualizada')
+        } catch (error) {
+            console.error('Error actualizando tarea:', error)
+            toast.error('No se pudo actualizar')
         }
     }
 
@@ -274,6 +293,7 @@ export function useBoard() {
         switchBoard,
         removeBoard,
         updateName,
+        updateTask,
         updateBoardDetails
     }
 }

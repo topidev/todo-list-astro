@@ -10,9 +10,10 @@ interface ColumnProps {
   ideas: Idea[]
   onStatusChange?: (taskId: string, newStatus: string) => void
   onDelete?: (taskId: string) => void
+  onEdit: (task: Idea) => void
 }
 
-export default function Column({ id, title, color, ideas, onStatusChange, onDelete }: ColumnProps) {
+export default function Column({ id, title, color, ideas, onStatusChange, onDelete, onEdit }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: id,
   })
@@ -40,11 +41,11 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
         {ideas.length === 0 ? (
           <p className="text-xs text-gray-400 text-center py-4">
             {isMobile ? (
-                <span>No hay tareas</span>
-              ): (
-                <span>Arrastra tareas aquí</span>
-              )}
-            </p>
+              <span>No hay tareas</span>
+            ) : (
+              <span>Arrastra tareas aquí</span>
+            )}
+          </p>
 
         ) : (
           ideas.map(idea => (
@@ -53,6 +54,7 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
               idea={idea}
               onStatusChange={onStatusChange}
               onDelete={onDelete}
+              onEdit={onEdit}
             />
           ))
         )}

@@ -13,6 +13,8 @@ export interface Idea {
   id: string
   text: string
   status: Status
+  description?: string
+  dueDate?: Date
   createdAt?: Timestamp | Date
   createdBy?: string
 }
