@@ -24,7 +24,7 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
   const isMobile = useIsMobile()
   const [searchTask, setSearchTask] = useState('')
   const [openSearch, setOpenSearch] = useState(false)
-  const [debounceSearch] = useDebounce(searchTask, 300)
+  const [debounceSearch] = useDebounce(searchTask.toLocaleLowerCase(), 300)
 
   useEffect(() => {
     setSearchTask('')
