@@ -72,13 +72,22 @@ export default function TaskCard({
   // Formatear fecha
   const formatDate = (date?: Date) => {
     if (!date) return null
-
+    // @ts-ignore
     const fecha = date.toDate()
     return fecha.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     })
+  }
+
+  const dueDateColor = (date?: Date) => {
+    if (!(date instanceof Date)) {
+      return
+    }
+    const currentDate = new Date()
+    console.log('Current Date: ', currentDate)
+    console.log('Due Date: ', date)
   }
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -121,15 +130,6 @@ export default function TaskCard({
           <p className="text-sm text-gray-600 select-none flex-1">{idea.text}</p>
 
           <div className="flex items-center gap-1 flex-shrink-0">
-            {/* Indicador de que tiene detalles */}
-            {hasDetails && (
-              <div className="flex items-center gap-1 text-xs text-gray-400 mr-1">
-                {idea.dueDate && (
-                  <Calendar className="h-3 w-3" />
-                )}
-              </div>
-            )}
-
             {/* Botón de menú de opciones */}
             <div className="relative">
               <button
@@ -177,6 +177,7 @@ export default function TaskCard({
               <button
                 onClick={(e) => {
                   e.stopPropagation()
+                  dueDateColor(idea?.dueDate)
                   setIsExpanded(!isExpanded)
                 }}
                 className="p-1 hover:bg-gray-100 rounded transition-all"

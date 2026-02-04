@@ -27,7 +27,7 @@ const COLUMNS: { id: Status; title: string; color: string }[] = [
     { id: 'inProgress', title: 'En Proceso', color: 'bg-yellow-100 border-yellow-200' },
     { id: 'paused', title: 'Pausada', color: 'bg-orange-100 border-orange-200' },
     { id: 'finished', title: 'Terminadas', color: 'bg-green-100 border-green-200' },
-    { id: 'dropped', title: 'Abandonada', color: 'bg-red-100 border-red-200' },
+    { id: 'dropped', title: 'Cancelada', color: 'bg-red-100 border-red-200' },
 ]
 
 
@@ -75,23 +75,14 @@ export default function Tablero({
 
     // - Función para el submit del Modal
     const handleTaskFormSubmit = async (data: TaskFormData) => {
-        console.log('Data: ', {
-            "Name: ": data.text,
-            "Description: ": data.description,
-            "DueDate: ": data.dueDate,
-        })
-
-        console.log(taskToEdit)
-        console.log(currentBoard?.name)
 
         if (taskFormMode === 'create') {
             console.log('OnCreate')
             await addTask(data.text, data.description, data.dueDate)
         } else if (taskToEdit && currentBoard) {
             console.log('OnEdit')
-            // if (boardId) {
+            console.log(data)
             await updateTask(taskToEdit.id, data)
-            // }
         }
     }
 

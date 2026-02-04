@@ -41,6 +41,7 @@ export default function TaskFormModal({
 
             if (mode === 'edit' && task) {
                 setText(task.text)
+                // @ts-ignore
                 const dateForDatePicker = task.dueDate ? task.dueDate.toDate() : null
                 setDate(dateForDatePicker)
                 setDesc(task.description || '')
@@ -73,7 +74,7 @@ export default function TaskFormModal({
             await onSubmit({
                 text: text.trim(),
                 description: desc.trim(),
-                dueDate: date as Date || undefined
+                dueDate: date as Date || null
             })
 
         } catch (error) {
