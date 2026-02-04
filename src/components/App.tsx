@@ -33,7 +33,7 @@ function AppContent() {
     addBoard,
     switchBoard,
     removeBoard,
-    updateName,
+    updateTask,
     updateBoardDetails
   } = useBoard()
 
@@ -111,6 +111,7 @@ function AppContent() {
                 addTask={addTask}
                 updateStatus={updateStatus}
                 removeTask={removeTask}
+                updateTask={updateTask}
               />
               <UserModal
                 open={openModal}

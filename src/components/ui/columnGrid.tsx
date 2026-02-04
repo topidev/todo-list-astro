@@ -24,7 +24,7 @@ export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete, 
     }
 
     return (
-        <main className="container-list w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <main className="container-list w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
             {grid.slice(0, 4).map(column => (
                 <Column
                     key={column.id}
@@ -39,7 +39,7 @@ export default function ColumnGrid({ grid, ideasList, onStatusChange, onDelete, 
             ))}
 
             {/* Última columna separada con col-span completo */}
-            <div className="md:col-span-2 lg:col-span-4">
+            <div className="md:col-span-2 lg:col-span-2 xl:col-span-4">
                 <Column
                     key={grid[4].id}
                     id={grid[4].id}

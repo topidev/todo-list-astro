@@ -41,7 +41,8 @@ export default function TaskFormModal({
 
             if (mode === 'edit' && task) {
                 setText(task.text)
-                setDate(task.dueDate || null)
+                const dateForDatePicker = task.dueDate ? task.dueDate.toDate() : null
+                setDate(dateForDatePicker)
                 setDesc(task.description || '')
             } else {
                 setDesc('')
@@ -72,12 +73,11 @@ export default function TaskFormModal({
             await onSubmit({
                 text: text.trim(),
                 description: desc.trim(),
-                dueDate: date || undefined
+                dueDate: date as Date || undefined
             })
-            toast.success('Success')
 
         } catch (error) {
-            console.log('Error en el formulario tarea')
+            console.log('Error en el formulario tarea', error)
             toast.error('Error en el formulario tarea')
         }
         finally {

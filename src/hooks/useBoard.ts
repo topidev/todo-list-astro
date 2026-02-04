@@ -43,14 +43,12 @@ export function useBoard() {
         const unsubscribe = subscribeToUserBoards(user.uid, (userBoards) => {
             setBoards(userBoards)
 
-            console.log('✨ Use Effect UseBoard', currentBoard?.name)
 
             if (userBoards.length === 0) {
                 createDefaultBoard()
                 return
             }
             if (!currentBoardId) {
-                console.log('Tu?', currentBoard)
                 setCurrentBoardId(userBoards[0].id)
             } else {
                 const stillExists = userBoards.some(b => b.id === currentBoardId)
@@ -88,8 +86,6 @@ export function useBoard() {
     // Suscribirse a cambios en tiempo real de las tareas
     useEffect(() => {
 
-        console.log('👁‍🗨 Estamos cambiando el tablero')
-        console.log('⚠ Este es el Tablero: ', currentBoard?.name)
         if (!currentBoard?.id) {
             setTasks([])
             return
@@ -111,6 +107,7 @@ export function useBoard() {
         try {
             await createTask(currentBoard.id, text, user.uid, desc, dueDate)
             // El listener actualizará automáticamente las tareas
+            toast.success('Tarea creada')
         } catch (error) {
             console.error('Error agregando tarea:', error)
         }
@@ -151,7 +148,7 @@ export function useBoard() {
 
         try {
             await deleteTask(currentBoard.id, taskId)
-            // El listener actualizará automáticamente las tareas
+            toast.success('Tarea Eliminada')
         } catch (error) {
             console.error('Error eliminando tarea:', error)
         }
@@ -244,6 +241,7 @@ export function useBoard() {
         try {
             await deleteBoard(boardId, user.uid)
 
+            toast.success('Board Eliminado')
             setBoards(prev => prev.filter(b => b.id !== boardId))
 
             // Si estamos eliminando el actual → seleccionar otro
@@ -254,21 +252,6 @@ export function useBoard() {
             console.error('Error eliminando board:', error)
             alert(error instanceof Error ? error.message : 'Error eliminando tablero')
         }
-        // try {
-        //     await deleteBoard(boardId, user.uid)
-
-        //     // Actualizar la lista local
-        //     const updatedBoards = boards.filter(b => b.id !== boardId)
-        //     setBoards(updatedBoards)
-
-        //     // Si eliminamos el board actual, cambiar a otro
-        //     if (currentBoard?.id === boardId && updatedBoards.length > 0) {
-        //         setCurrentBoard(updatedBoards[0])
-        //     }
-        // } catch (error) {
-        //     console.error('Error eliminando board:', error)
-        //     alert(error instanceof Error ? error.message : 'Error eliminando tablero')
-        // }
     }
 
     //Actualizar nombre del board

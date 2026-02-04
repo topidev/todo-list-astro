@@ -9,7 +9,7 @@ import IdeaInput from "../ui/inputTask"
 import { useIsMobile } from "../../layouts/useMediaQuery"
 import { useBoard } from "../../hooks/useBoard"
 import TaskFormModal, { type TaskFormData } from "../ui/taskFormModal"
-import { updateTask } from "../../lib/firestoreService"
+// import { updateTask } from "../../lib/firestoreService"
 
 
 interface BoardProps {
@@ -18,6 +18,7 @@ interface BoardProps {
     addTask: (text: string, description: string | undefined, dueDate: Date | undefined) => Promise<void>
     updateStatus: (taskId: string, newStatus: Status) => Promise<void>
     removeTask: (taskId: string) => Promise<void>
+    updateTask: (taskId: string, data: TaskFormData) => Promise<void>
 }
 
 //- Arreglo para columnas dinamicas
@@ -35,7 +36,8 @@ export default function Tablero({
     loading,
     addTask,
     updateStatus,
-    removeTask
+    removeTask,
+    updateTask
 }: BoardProps) {
     // - Valor del input
     const [inputValue, setInputValue] = useState('')
@@ -53,6 +55,9 @@ export default function Tablero({
     const [taskToEdit, setTaskToEdit] = useState<Idea | null>(null)
     const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit'>('create')
 
+
+    const { currentBoard } = useBoard()
+
     // - Método para el enter en el input
     const handleEnter = async (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && inputValue.trim()) {
@@ -63,7 +68,6 @@ export default function Tablero({
             setTaskToEdit(null)
             setTaskFormOpen(true)
 
-
             setInputValue('')
         }
     }
@@ -71,23 +75,33 @@ export default function Tablero({
 
     // - Función para el submit del Modal
     const handleTaskFormSubmit = async (data: TaskFormData) => {
+        console.log('Data: ', {
+            "Name: ": data.text,
+            "Description: ": data.description,
+            "DueDate: ": data.dueDate,
+        })
+
+        console.log(taskToEdit)
+        console.log(currentBoard?.name)
+
         if (taskFormMode === 'create') {
+            console.log('OnCreate')
             await addTask(data.text, data.description, data.dueDate)
-        } else if (taskToEdit) {
-            const boardId = useBoard().currentBoard?.id
-            console.log(boardId)
-            if (boardId) {
-                await updateTask(boardId, taskToEdit.id, data)
-            }
+        } else if (taskToEdit && currentBoard) {
+            console.log('OnEdit')
+            // if (boardId) {
+            await updateTask(taskToEdit.id, data)
+            // }
         }
     }
 
-    // Funcion para abrir edición (lo usaremos después en TaskCard)
+    // Funcion para abrir edición del Task
     const handleOpenEditTask = (task: Idea) => {
         setTaskFormMode('edit')
         setTaskToEdit(task)
         setTaskFormOpen(true)
     }
+
 
     const handleDragStart = (event: DragStartEvent) => {
         setActiveId(event.active.id as string)
