@@ -1,13 +1,15 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
-import { Calendar, ChevronDown, ChevronUp, Edit2, GripVertical, MoreVertical, Trash2 } from 'lucide-react'
+import { Calendar, ChevronDown, ChevronUp, Clock, Edit2, GripVertical, MoreVertical, Trash2 } from 'lucide-react'
 import type { Idea } from '../../types/types'
 import StatusMenu from './statusMenu'
+import { getUrgencyLevel, getUrgencyStyle, formatDate } from '../../lib/taskUtils'
 
 interface TaskCardProps {
   idea: Idea
   isDragging?: boolean
+  showUrgency?: boolean
   onStatusChange?: (taskId: string, newStatus: string) => void
   onDelete?: (taskId: string) => void
   onEdit?: (task: Idea) => void
@@ -16,6 +18,7 @@ interface TaskCardProps {
 export default function TaskCard({
   idea,
   isDragging = false,
+  showUrgency = true,
   onStatusChange,
   onDelete,
   onEdit
@@ -31,6 +34,11 @@ export default function TaskCard({
   const style = {
     transform: CSS.Translate.toString(transform),
   }
+
+  //Calcular urgencia
+  const uLevel = getUrgencyLevel(idea.dueDate)
+  const uStyles = getUrgencyStyle(uLevel)
+  const shouldShowUrgency = showUrgency && uLevel !== 'none'
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevenir expansión si se clickea en botones específicos
@@ -69,7 +77,7 @@ export default function TaskCard({
     }
   }
 
-  // Formatear fecha
+  // Formatear fecha simple
   const formatDate = (date?: Date) => {
     if (!date) return null
     // @ts-ignore
@@ -81,14 +89,6 @@ export default function TaskCard({
     })
   }
 
-  const dueDateColor = (date?: Date) => {
-    if (!(date instanceof Date)) {
-      return
-    }
-    const currentDate = new Date()
-    console.log('Current Date: ', currentDate)
-    console.log('Due Date: ', date)
-  }
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -109,9 +109,10 @@ export default function TaskCard({
         ref={setNodeRef}
         style={style}
         onClick={handleCardClick}
-        className={`group idea p-3 bg-white shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-all  
-          ${isDragging ? 'cursor-grabbing opacity-50 rotate-3 scale-105 shadow-lg' : ''
-          }`}
+        className={`group idea p-3 bg-white duration-300 shadow-sm rounded-lg border border-gray-200 hover:shadow-md transition-all  
+          ${isDragging ? 'cursor-grabbing opacity-50 rotate-3 scale-105 shadow-lg' : ''}
+          ${shouldShowUrgency ? uStyles.ring : ''}
+          `}
       >
         <div className="flex items-center justify-between gap-2">
           {/* Drag handle - solo visible en desktop */}
@@ -126,8 +127,23 @@ export default function TaskCard({
             <GripVertical className="h-4 w-4 text-gray-400" />
           </button>
 
-          {/* Texto de la tarea */}
-          <p className="text-sm text-gray-600 select-none flex-1">{idea.text}</p>
+          {/* Contenido de la tarea */}
+          <div className="flex-1 min-w-0">
+            {/* Texto de la tarea */}
+            <p className="text-sm text-gray-700 select-none">
+              {idea.text}
+            </p>
+
+            {/* Badge de urgencia - solo si tiene dueDate y showUrgency es true */}
+            {shouldShowUrgency && (
+              <div className={`flex items-center gap-1 mt-1 text-xs ${uStyles.text}`}>
+                <Clock className="h-3 w-3" />
+                <span className="font-medium">
+                  {formatDate(idea.dueDate)}
+                </span>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center gap-1 flex-shrink-0">
             {/* Botón de menú de opciones */}
@@ -177,7 +193,6 @@ export default function TaskCard({
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  dueDateColor(idea?.dueDate)
                   setIsExpanded(!isExpanded)
                 }}
                 className="p-1 hover:bg-gray-100 rounded transition-all"
@@ -212,6 +227,11 @@ export default function TaskCard({
                 <div>
                   <p className="text-xs font-semibold text-gray-500">Fecha límite:</p>
                   <p className="text-sm text-gray-700">{formatDate(idea.dueDate)}</p>
+                  {shouldShowUrgency && (
+                    <p className={`text-xs ${uStyles.text} font-medium`}>
+                      {uStyles.label}
+                    </p>
+                  )}
                 </div>
               </div>
             )}

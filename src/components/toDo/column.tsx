@@ -5,6 +5,7 @@ import { useIsMobile } from '../../layouts/useMediaQuery'
 import { useEffect, useMemo, useState } from 'react'
 import { Search, SidebarOpen, X } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
+import { sortTaskByDate } from '../../lib/taskUtils'
 
 interface ColumnProps {
   id: string
@@ -26,6 +27,9 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
   const [openSearch, setOpenSearch] = useState(false)
   const [debounceSearch] = useDebounce(searchTask.toLocaleLowerCase(), 300)
 
+  // Determinar si debe mostrar urgencia (NO en 'finished' y 'dropped')
+  const showUrgency = id !== 'finished' && id !== 'dropped'
+
   useEffect(() => {
     setSearchTask('')
     setOpenSearch(false)
@@ -33,14 +37,17 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
 
 
   const filteredIdeas = useMemo(() => {
-    if (debounceSearch.trim() === '') return ideas
 
-    const query = debounceSearch.trim()
+    let filtered = ideas
+    if (debounceSearch.trim() !== '') {
+      const query = debounceSearch.toLowerCase()
+      filtered = ideas.filter(idea =>
+        idea.text.toLowerCase().includes(query) ||
+        idea.description?.toLowerCase().includes(query)
+      )
+    }
+    return sortTaskByDate(filtered)
 
-    return ideas.filter(idea =>
-      idea.text.toLowerCase().includes(query) ||
-      idea.description?.toLowerCase().includes(query)
-    )
   }, [ideas, debounceSearch])
 
   const maxSize = filteredIdeas.length >= 5
@@ -109,6 +116,7 @@ export default function Column({ id, title, color, ideas, onStatusChange, onDele
             <TaskCard
               key={idea.id}
               idea={idea}
+              showUrgency={showUrgency}
               onStatusChange={onStatusChange}
               onDelete={onDelete}
               onEdit={onEdit}

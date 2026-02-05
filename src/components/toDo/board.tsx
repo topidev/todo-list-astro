@@ -77,11 +77,8 @@ export default function Tablero({
     const handleTaskFormSubmit = async (data: TaskFormData) => {
 
         if (taskFormMode === 'create') {
-            console.log('OnCreate')
             await addTask(data.text, data.description, data.dueDate)
         } else if (taskToEdit && currentBoard) {
-            console.log('OnEdit')
-            console.log(data)
             await updateTask(taskToEdit.id, data)
         }
     }
