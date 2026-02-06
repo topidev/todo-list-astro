@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactEventHandler } from "react"
 import { useAuth } from "../auth/AuthProvider"
 import { DndContext, DragOverlay, closestCorners } from '@dnd-kit/core'
-import type { Idea, Status } from "../../types/types"
+import type { Board, Idea, Status } from "../../types/types"
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import TaskCard from "./taskCard"
 import ColumnGrid from "../ui/columnGrid"
@@ -15,6 +15,7 @@ import TaskFormModal, { type TaskFormData } from "../ui/taskFormModal"
 interface BoardProps {
     tasks: Idea[]
     loading: boolean
+    currentBoard: Board | null
     addTask: (text: string, description: string | undefined, dueDate: Date | undefined) => Promise<void>
     updateStatus: (taskId: string, newStatus: Status) => Promise<void>
     removeTask: (taskId: string) => Promise<void>
@@ -34,6 +35,7 @@ const COLUMNS: { id: Status; title: string; color: string }[] = [
 export default function Tablero({
     tasks,
     loading,
+    currentBoard,
     addTask,
     updateStatus,
     removeTask,
@@ -56,7 +58,7 @@ export default function Tablero({
     const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit'>('create')
 
 
-    const { currentBoard } = useBoard()
+    // const { currentBoard } = useBoard()
 
     // - Método para el enter en el input
     const handleEnter = async (e: React.KeyboardEvent) => {

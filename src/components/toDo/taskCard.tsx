@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Calendar, ChevronDown, ChevronUp, Clock, Edit2, GripVertical, MoreVertical, Trash2 } from 'lucide-react'
 import type { Idea } from '../../types/types'
 import StatusMenu from './statusMenu'
-import { getUrgencyLevel, getUrgencyStyle, formatDate } from '../../lib/taskUtils'
+import { getUrgencyLevel, getUrgencyStyle, formatDate, timeToDate } from '../../lib/taskUtils'
 
 interface TaskCardProps {
   idea: Idea
@@ -81,7 +81,7 @@ export default function TaskCard({
   const formatDate = (date?: Date) => {
     if (!date) return null
     // @ts-ignore
-    const fecha = date.toDate()
+    const fecha = timeToDate(date)!
     return fecha.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',

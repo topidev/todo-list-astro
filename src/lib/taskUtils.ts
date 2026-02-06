@@ -83,7 +83,7 @@ export function getUrgencyStyle(u: UrgencyLevel): UngencyStyles {
     }
 }
 
-function timeToDate(time: Date | string | Timestamp | undefined): Date | null {
+export function timeToDate(time: Date | string | Timestamp | undefined): Date | null {
     if (!time) return null
 
     if (time instanceof Timestamp) {

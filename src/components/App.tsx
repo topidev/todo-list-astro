@@ -108,6 +108,7 @@ function AppContent() {
               <Tablero
                 tasks={tasks}
                 loading={boardLoading}
+                currentBoard={currentBoard}
                 addTask={addTask}
                 updateStatus={updateStatus}
                 removeTask={removeTask}
