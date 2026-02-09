@@ -11,7 +11,8 @@ import {
     subscribeToUserBoards,
     updateBoardName,
     updateBoard,
-    updateTask as updateTaskFirestore
+    updateTask as updateTaskFirestore,
+    moveTaskToBoard
 } from '../lib/firestoreService'
 import type { Board, Idea, Status } from '../types/types'
 import { collection, query, where } from 'firebase/firestore'
@@ -56,17 +57,6 @@ export function useBoard() {
                     setCurrentBoardId(userBoards[0].id)
                 }
             }
-            // } else {
-
-            //     if (!stillExists) {
-            //         console.log('Tu?')
-            //         setCurrentBoard(userBoards[0])
-            //     } else {
-            //         console.log('Tu?', stillExists.name)
-            //         setCurrentBoard(stillExists)
-            //     }
-            // }
-
 
             setLoading(false)
         })
@@ -114,11 +104,11 @@ export function useBoard() {
     }
 
     // Agregar updateTask
-    const updateTask = async (taskId: string, data: TaskFormData) => {
+    const updateTask = async (currentBoardId: string, taskId: string, data: TaskFormData) => {
         if (!currentBoard) return
 
         try {
-            await updateTaskFirestore(currentBoard.id, taskId, {
+            await updateTaskFirestore(currentBoardId, taskId, {
                 text: data.text,
                 description: data.description,
                 dueDate: data.dueDate,
@@ -218,15 +208,6 @@ export function useBoard() {
 
     // Cambiar de board
     const switchBoard = (boardId: string) => {
-        // const board = boards.find(b => b.id === boardId)
-
-        // if (board) {
-        //     console.log('☢ Switch Board: ', board.name)
-        //     setCurrentBoardId(boardId)
-        // } else {
-        //     console.log('❌ Board no encontrado en la lista')
-        // }
-
         if (boards.some(b => b.id === boardId)) {
             setCurrentBoardId(boardId)
         } else {
@@ -254,13 +235,35 @@ export function useBoard() {
         }
     }
 
-    //Actualizar nombre del board
+    // Actualizar nombre del board
     const updateName = async (boardId: string | any, boardName: string) => {
         try {
             await updateBoardName(boardId, boardName)
             toast.success('Nombre actualizado')
         } catch (error) {
             toast.error('No se pudo actualizar el nombre')
+        }
+    }
+
+    // Mover Tarea a otro board
+    const moveTask = async (
+        taskId: string, 
+        toBoardId: string,
+        updatedData?: Partial<Idea>  // ⬅️ NUEVO
+    ) => {
+        if (!currentBoard) return
+        
+        if (currentBoard.id === toBoardId) {
+            toast.error('La tarea ya está en este tablero')
+            return
+        }
+        
+        try {
+            await moveTaskToBoard(taskId, currentBoard.id, toBoardId, updatedData)
+            toast.success('Tarea guardada y movida')
+        } catch (error) {
+            console.error('Error moviendo tarea:', error)
+            toast.error('Error al mover la tarea')
         }
     }
 
@@ -277,6 +280,7 @@ export function useBoard() {
         removeBoard,
         updateName,
         updateTask,
-        updateBoardDetails
+        updateBoardDetails,
+        moveTask
     }
 }

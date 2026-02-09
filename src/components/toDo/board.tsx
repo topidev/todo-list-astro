@@ -16,10 +16,12 @@ interface BoardProps {
     tasks: Idea[]
     loading: boolean
     currentBoard: Board | null
+    boards: Board[]
     addTask: (text: string, description: string | undefined, dueDate: Date | undefined) => Promise<void>
     updateStatus: (taskId: string, newStatus: Status) => Promise<void>
     removeTask: (taskId: string) => Promise<void>
-    updateTask: (taskId: string, data: TaskFormData) => Promise<void>
+    updateTask: (curretBoardId: string, taskId: string, data: TaskFormData) => Promise<void>
+    moveTask: (taskId: string, toBoardId: string, updatedData?: Partial<Idea>) => Promise<void>
 }
 
 //- Arreglo para columnas dinamicas
@@ -36,10 +38,12 @@ export default function Tablero({
     tasks,
     loading,
     currentBoard,
+    boards,
     addTask,
     updateStatus,
     removeTask,
-    updateTask
+    updateTask,
+    moveTask
 }: BoardProps) {
     // - Valor del input
     const [inputValue, setInputValue] = useState('')
@@ -57,8 +61,6 @@ export default function Tablero({
     const [taskToEdit, setTaskToEdit] = useState<Idea | null>(null)
     const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit'>('create')
 
-
-    // const { currentBoard } = useBoard()
 
     // - Método para el enter en el input
     const handleEnter = async (e: React.KeyboardEvent) => {
@@ -81,7 +83,7 @@ export default function Tablero({
         if (taskFormMode === 'create') {
             await addTask(data.text, data.description, data.dueDate)
         } else if (taskToEdit && currentBoard) {
-            await updateTask(taskToEdit.id, data)
+            await updateTask(currentBoard.id, taskToEdit.id, data)
         }
     }
 
@@ -92,6 +94,10 @@ export default function Tablero({
         setTaskFormOpen(true)
     }
 
+    // Funcion para Mover la task
+    const handleBoardChange = async (taskId: string, newBoardId: string, updatedData?: Partial<Idea>) => {
+        await moveTask(taskId, newBoardId, updatedData)
+    }
 
     const handleDragStart = (event: DragStartEvent) => {
         setActiveId(event.active.id as string)
@@ -161,11 +167,14 @@ export default function Tablero({
             {/* Modal de crear/editar tarea */}
             <TaskFormModal
                 open={taskFormOpen}
+                onBoardChange={handleBoardChange}
                 onOpenModal={setTaskFormOpen}
                 onSubmit={handleTaskFormSubmit}
                 task={taskToEdit}
                 initialText={taskInitialText}
                 mode={taskFormMode}
+                boards={boards}
+                currentBoardId={currentBoard?.id!}
             />
         </div>
     )

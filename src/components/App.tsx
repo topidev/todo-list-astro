@@ -17,7 +17,6 @@ function AppContent() {
   const [editName, setEditName] = useState(false)
   const [newBoardName, setNewBoardName] = useState('')
 
-  const [openShareModal, setOpenShareModal] = useState(false)
   const [openBoardFormModal, setOpenBoardFormModal] = useState(false)
   const [boardFormMode, setBoardFormMode] = useState<'create' | 'edit'>('create')
   const [boardToEdit, setBoardToEdit] = useState<Board | null>(null)
@@ -34,7 +33,8 @@ function AppContent() {
     switchBoard,
     removeBoard,
     updateTask,
-    updateBoardDetails
+    updateBoardDetails,
+    moveTask
   } = useBoard()
 
   if (authLoading || boardLoading) {
@@ -99,20 +99,22 @@ function AppContent() {
                     </span>
 
                   </h1>
-                  {/* <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 mt-1">
                     {boards.length} {boards.length === 1 ? 'tablero' : 'tableros'} total
-                  </p> */}
+                  </p>
                 </div>
               )}
 
               <Tablero
                 tasks={tasks}
                 loading={boardLoading}
+                boards={boards}
                 currentBoard={currentBoard}
                 addTask={addTask}
                 updateStatus={updateStatus}
                 removeTask={removeTask}
                 updateTask={updateTask}
+                moveTask={moveTask}
               />
               <UserModal
                 open={openModal}

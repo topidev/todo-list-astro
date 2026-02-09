@@ -1,7 +1,7 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
-import { Calendar, ChevronDown, ChevronUp, Clock, Edit2, GripVertical, MoreVertical, Trash2 } from 'lucide-react'
+import { Calendar, ChevronDown, ChevronUp, Clock, Edit2, GripVertical, MoreVertical, Move, Trash2 } from 'lucide-react'
 import type { Idea } from '../../types/types'
 import StatusMenu from './statusMenu'
 import { getUrgencyLevel, getUrgencyStyle, formatDate, timeToDate } from '../../lib/taskUtils'
@@ -176,6 +176,7 @@ export default function TaskCard({
                       <Edit2 className="h-3.5 w-3.5" />
                       Editar
                     </button>
+                    
                     <button
                       onClick={handleDelete}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-red-50 flex items-center gap-2 text-red-600"

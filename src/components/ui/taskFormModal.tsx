@@ -1,5 +1,5 @@
 import { useEffect, useState, type SetStateAction } from "react"
-import type { Idea } from "../../types/types"
+import type { Board, Idea } from "../../types/types"
 import toast from "react-hot-toast"
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@radix-ui/react-dialog"
 import { X, Calendar } from "lucide-react"
@@ -12,14 +12,22 @@ interface TaskFormProps {
     initialText: string
     task?: Idea | null
     mode: 'create' | 'edit'
+    boards: Board[]
+    currentBoardId: string
     onOpenModal: (open: boolean) => void
     onSubmit: (data: TaskFormData) => Promise<void>
+    onBoardChange?: (
+        taskId: string, 
+        newBoardId: string,
+        updatedData?: Partial<Idea> 
+    ) => Promise<void>
 }
 
 export interface TaskFormData {
     text: string
     description?: string
     dueDate?: Date
+    boardId?: string  
 }
 
 export default function TaskFormModal({
@@ -27,13 +35,18 @@ export default function TaskFormModal({
     initialText,
     task,
     mode,
+    boards,
+    currentBoardId,
     onOpenModal,
-    onSubmit
+    onSubmit,
+    onBoardChange
 }: TaskFormProps) {
     const [text, setText] = useState('')
     const [desc, setDesc] = useState('')
     const [date, setDate] = useState<Date | null>(null)
     const [loading, setLoading] = useState(false)
+    const [selectedBoardId, setSelectedBoardId] = useState(currentBoardId)
+    const [boardChanged, setBoardChanged] = useState(false)
 
     useEffect(() => {
         if (open) {
@@ -50,32 +63,47 @@ export default function TaskFormModal({
                 setDate(null)
                 setText(initialText)
             }
+            setSelectedBoardId(currentBoardId)
+            setBoardChanged(false)
         } else {
             document.body.style.overflow = 'unset'
         }
 
         return () => { document.body.style.overflow = 'unset' }
 
-    }, [open, mode, task, initialText])
+    }, [open, mode, task, initialText, currentBoardId])
+
+    const handleBoardChange = (newBoardId: string) => {
+        setSelectedBoardId(newBoardId)
+        setBoardChanged(newBoardId !== currentBoardId)
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!text.trim()) {
-            toast('No tiene nombre', {
-                icon: '⚠'
-            })
+            toast('No tiene nombre', { icon: '⚠' })
             return
         }
 
         setLoading(true)
 
         try {
-            await onSubmit({
+
+            const updatedData = {
                 text: text.trim(),
                 description: desc.trim(),
-                dueDate: date as Date || null
-            })
+                dueDate: date as Date || null,
+            }
+            // Si cambió de tablero y es modo edición
+            if (boardChanged && mode === 'edit' && task && onBoardChange) {
+                await onBoardChange(task.id, selectedBoardId, updatedData)
+            } else {
+                await onSubmit({
+                    ...updatedData,
+                    boardId: selectedBoardId
+                })
+            }
 
         } catch (error) {
             console.log('Error en el formulario tarea', error)
@@ -129,6 +157,38 @@ export default function TaskFormModal({
                             <p className="text-xs text-gray-400">{text.length}/100 caracteres</p>
                         </div>
 
+                        {mode === 'edit' && boards.length > 1 && (
+                            <div className="space-y-2">
+                                <label htmlFor="board" className="text-sm font-medium text-white flex items-center gap-2">
+                                    📋 Tablero
+                                    {boardChanged && (
+                                        <span className="text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full">
+                                            Se moverá
+                                        </span>
+                                    )}
+                                </label>
+                                <select
+                                    id="board"
+                                    value={selectedBoardId}
+                                    onChange={(e) => handleBoardChange(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-900 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    {boards.map(board => (
+                                        <option key={board.id} value={board.id}>
+                                            {board.name}
+                                            {board.id === currentBoardId ? ' (actual)' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                {boardChanged && (
+                                    <p className="text-xs text-orange-400">
+                                        La tarea se moverá de "{boards.find(b => b.id === currentBoardId)?.name}" 
+                                        a "{boards.find(b => b.id === selectedBoardId)?.name}"
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                         {/* Descripción */}
                         <div className="space-y-2">
                             <label htmlFor="description" className="text-sm font-medium text-white">
@@ -173,6 +233,17 @@ export default function TaskFormModal({
                                 </button>
                             )}
                         </div>
+
+                        {boardChanged && (
+                            <div className="p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full" />
+                                <p className="text-sm text-orange-300">
+                                    Esta tarea se moverá al guardar
+                                </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Footer */}
@@ -187,7 +258,9 @@ export default function TaskFormModal({
                                 ? 'Guardando...'
                                 : mode === 'create'
                                     ? 'Crear tarea'
-                                    : 'Guardar cambios'}
+                                    : boardChanged
+                                        ? 'Guardar y mover'
+                                        : 'Guardar cambios'}
                         </Button>
                     </div>
                 </form>

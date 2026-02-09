@@ -323,6 +323,40 @@ export async function deleteTask(boardId: string, taskId: string): Promise<void>
 }
 
 /**
+ * Mueve una tarea de un tablero a otro
+ * Opcionalmente actualiza los datos de la tarea en el proceso
+ */
+export async function moveTaskToBoard(
+  taskId: string,
+  fromBoardId: string,
+  toBoardId: string,
+  updatedData?: Partial<Idea>  // ⬅️ NUEVO
+): Promise<void> {
+  // 1. Obtener la tarea del tablero origen
+  const taskRef = doc(db, 'boards', fromBoardId, 'tasks', taskId)
+  const taskSnap = await getDoc(taskRef)
+  
+  if (!taskSnap.exists()) {
+    throw new Error('Tarea no encontrada')
+  }
+  
+  const taskData = taskSnap.data() as Idea
+  
+  // 2. Crear la tarea en el tablero destino CON datos actualizados
+  const newTaskRef = doc(db, 'boards', toBoardId, 'tasks', taskId)
+  await setDoc(newTaskRef, {
+    ...taskData,
+    ...updatedData,  // ⬅️ Aplicar cambios aquí
+    movedFrom: fromBoardId,
+    movedAt: serverTimestamp(),
+    updatedAt: serverTimestamp()  // ⬅️ Marca de actualización
+  })
+  
+  // 3. Eliminar del tablero origen
+  await deleteDoc(taskRef)
+}
+
+/**
  * Escuchar cambios en tiempo real de las tareas
  */
 export function subscribeToTasks(
