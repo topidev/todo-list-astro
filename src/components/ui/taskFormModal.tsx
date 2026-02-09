@@ -119,10 +119,10 @@ export default function TaskFormModal({
             <DialogContent className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                 <form
                     onSubmit={handleSubmit}
-                    className="relative w-full max-w-lg bg-slate-700 rounded-lg shadow-xl"
+                    className="relative w-full max-w-lg bg-slate-700 rounded-lg shadow-xl max-h-[90vh] overflow-y-auto overscroll-y-contain scrollbar-thin"
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-600">
+                    <div className="flex items-center justify-between p-6 border-b border-gray-600 sticky top-0 bg-slate-700 z-10">
                         <DialogTitle className="text-xl font-bold text-white">
                             {mode === 'create' ? 'Nueva Tarea' : 'Editar Tarea'}
                         </DialogTitle>
@@ -247,7 +247,7 @@ export default function TaskFormModal({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-600">
+                    <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-600 sticky bottom-0 bg-slate-700 z-10">
                         <DialogClose asChild>
                             <Button type="button" variant="outline" disabled={loading}>
                                 Cancelar

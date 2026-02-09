@@ -232,7 +232,7 @@ export default function UserModal({
                             )}
                         </div>
 
-                        <div className="members-list bg-slate-800 p-4 rounded w-full my-4">
+                        <div className="members-list bg-slate-800 p-4 rounded w-full my-4 max-h-60 overflow-y-auto overscroll-y-contain">
                             <h3 className="text-white my-4 font-bold">Miembros actuales:</h3>
                             {members.map(member => (
                                 <MemberItem
