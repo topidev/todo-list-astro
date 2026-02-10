@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import BoardFormModal, { type BoardFormData } from './ui/BoardFormModal'
 import type { Board } from '../types/types'
+import { useIsMobile } from '../layouts/useMediaQuery'
 
 function AppContent() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth()
@@ -34,6 +35,8 @@ function AppContent() {
     updateBoardDetails,
     moveTask
   } = useBoard()
+
+  const isMobile = useIsMobile()
 
   const { showInstallButton, install } = usePWAInstall();
 
@@ -83,7 +86,7 @@ function AppContent() {
 
   return (
     <>
-      {showInstallButton && (
+      {showInstallButton && isMobile && (
           <div
             className='relative w-full block'
           >
