@@ -7,4 +7,12 @@ export default defineConfig({
     react(),
     tailwind()
   ],
+  vite: {
+    build: {
+      rollupOptions: {
+        // Excluir el SW del bundle
+        external: ['/sw.js', '/register-sw.js']
+      }
+    }
+  }
 });
