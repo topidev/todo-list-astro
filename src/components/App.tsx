@@ -91,7 +91,11 @@ function AppContent() {
             className='relative w-full block'
           >
             {isIOS ? (
-              <div className="ios-install-banner">
+              <div className="
+                ios-install-banner p-4 w-full
+                bg-gray-900 shadow-md shadow-slate-500 text-white text-sm
+                flex flex-col gap-2"
+              >
                 <p>Para instalar esta app:</p>
                 <ol>
                   <li>Toca el botón <strong>Compartir</strong> (cuadrado con flecha ↑)</li>
@@ -104,7 +108,7 @@ function AppContent() {
             ) : (
               showInstallButton && <button 
                 onClick={install}
-                className='fixed p-4 z-10 top-0 w-full bg-cyan-950 text-white text-center text-lg'
+                className='fixed p-4 z-10 top-0 w-full bg-gray-900 shadow-md shadow-slate-500 text-center text-lg'
               >
                 Instalar aplicación
               </button>
