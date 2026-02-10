@@ -83,6 +83,19 @@ function AppContent() {
 
   return (
     <>
+      {showInstallButton && (
+          <div
+            className='relative w-full block'
+          >
+            <button 
+              onClick={install}
+              className='fixed p-4 z-10 top-0 w-full bg-cyan-950 text-white text-center text-lg'
+            >
+              Instalar aplicación
+            </button>
+
+          </div>
+        )}
       <Sidebar
         boards={boards}
         currentBoard={currentBoard}
@@ -149,12 +162,7 @@ function AppContent() {
                 Iniciar sesión con Google
               </Button>
             </div>
-          )}
-          {showInstallButton && (
-            <button onClick={install}>
-              Instalar aplicación
-            </button>
-          )}
+          )}          
         </div>
       </div>
     </>
