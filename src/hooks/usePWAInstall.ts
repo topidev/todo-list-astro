@@ -11,34 +11,56 @@ type DeferredPrompt = BeforeInstallPromptEvent | null;
 export function usePWAInstall() {
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<DeferredPrompt>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
-  useEffect(() => {
-    const handler = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallButton(true);
+  
+
+    useEffect(() => {
+        // Detección de iOS (más confiable que userAgent solo)
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isAppleDevice = /iphone|ipad|ipod/.test(userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+
+        setIsIOS(isAppleDevice && isSafari);
+
+        // Chequea si ya está instalado (standalone = ya es PWA)
+        setIsStandalone(window.matchMedia('(display-mode: standalone)').matches ||
+                        ('standalone' in navigator && (navigator as any).standalone));
+
+
+        const handler = (e: BeforeInstallPromptEvent) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+        setShowInstallButton(true);
+        };
+
+        window.addEventListener('beforeinstallprompt', handler);
+
+        // Opcional: si ya está disponible al cargar (raro pero pasa en algunos casos)
+        // if ('standalone' in navigator === false && 'BeforeInstallPromptEvent' in window) { ... }
+
+        return () => {
+        window.removeEventListener('beforeinstallprompt', handler);
+        };
+    }, []);
+
+    const install = async () => {
+        if (deferredPrompt) {
+            // Para Android/Chromium
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                setShowInstallButton(false);
+                setDeferredPrompt(null);
+            }
+        }
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
-
-    // Opcional: si ya está disponible al cargar (raro pero pasa en algunos casos)
-    // if ('standalone' in navigator === false && 'BeforeInstallPromptEvent' in window) { ... }
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
+    return { 
+        showInstallButton: showInstallButton && !isStandalone, // no mostrar si ya instalado
+        isIOS,
+        isStandalone,
+        install, 
     };
-  }, []);
-
-  const install = async () => {
-    if (!deferredPrompt) return;
-    
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log('Resultado instalación:', outcome); // "accepted" o "dismissed"
-    
-    setDeferredPrompt(null);
-    setShowInstallButton(false);
-  };
-
-  return { showInstallButton, install };
 };

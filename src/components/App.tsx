@@ -38,7 +38,7 @@ function AppContent() {
 
   const isMobile = useIsMobile()
 
-  const { showInstallButton, install } = usePWAInstall();
+  const { showInstallButton, isIOS, isStandalone, install } = usePWAInstall();
 
   useEffect(() => {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -86,17 +86,29 @@ function AppContent() {
 
   return (
     <>
-      {showInstallButton && isMobile && (
+      {!isStandalone && isMobile && (
           <div
             className='relative w-full block'
           >
-            <button 
-              onClick={install}
-              className='fixed p-4 z-10 top-0 w-full bg-cyan-950 text-white text-center text-lg'
-            >
-              Instalar aplicación
-            </button>
-
+            {isIOS ? (
+              <div className="ios-install-banner">
+                <p>Para instalar esta app:</p>
+                <ol>
+                  <li>Toca el botón <strong>Compartir</strong> (cuadrado con flecha ↑)</li>
+                  <li>Desliza y selecciona <strong>Añadir a la pantalla de inicio</strong></li>
+                  <li>Toca <strong>Añadir</strong></li>
+                </ol>
+                {/* Opcional: pon una flechita o screenshot */}
+                <button onClick={() => alert('¡Sigue los pasos!')}>Entendido</button>
+              </div>
+            ) : (
+              showInstallButton && <button 
+                onClick={install}
+                className='fixed p-4 z-10 top-0 w-full bg-cyan-950 text-white text-center text-lg'
+              >
+                Instalar aplicación
+              </button>
+            )}
           </div>
         )}
       <Sidebar
