@@ -1,21 +1,19 @@
 import { useBoard } from '../hooks/useBoard'
+import { usePWAInstall } from '../hooks/usePWAInstall'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import Tablero from './toDo/board'
 import Sidebar from './ui/Sidebar'
 import { Button } from './ui/button'
 import GoogleLogo from '../assets/icons8-google.svg'
 import UserModal from './ui/userModal'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
-import { Edit } from 'lucide-react'
 import BoardFormModal, { type BoardFormData } from './ui/BoardFormModal'
 import type { Board } from '../types/types'
 
 function AppContent() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth()
   const [openModal, setOpenModal] = useState(false)
-  const [editName, setEditName] = useState(false)
-  const [newBoardName, setNewBoardName] = useState('')
 
   const [openBoardFormModal, setOpenBoardFormModal] = useState(false)
   const [boardFormMode, setBoardFormMode] = useState<'create' | 'edit'>('create')
@@ -36,6 +34,15 @@ function AppContent() {
     updateBoardDetails,
     moveTask
   } = useBoard()
+
+  const { showInstallButton, install } = usePWAInstall();
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault()
+      window.deferredPrompt = e
+    })
+  }, [])
 
   if (authLoading || boardLoading) {
     return (
@@ -142,6 +149,11 @@ function AppContent() {
                 Iniciar sesión con Google
               </Button>
             </div>
+          )}
+          {showInstallButton && (
+            <button onClick={install}>
+              Instalar aplicación
+            </button>
           )}
         </div>
       </div>
