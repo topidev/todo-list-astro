@@ -39,7 +39,7 @@ export default function GeneralDashboard() {
             className='group-hover:-translate-x-1 transition-transform duration-350'
           />
         </Button>
-        <h1 className='text-2xl font-bold my-5'>Panel General de Control</h1>
+        <h1 className='text-2xl font-bold my-5'>Panel General</h1>
       </div>
       
       <div className="flex flex-col lg:flex-row gap-6">
