@@ -6,6 +6,21 @@ export default {
   ],
   theme: {
     extend: {
+      keyframes: {
+        "slide-in-from-left": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        "slide-out-to-left": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
+      },
+      animation: {
+        // Tiempos ajustados para notar el efecto
+        "slide-in-from-left": "slide-in-from-left 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+        "slide-out-to-left": "slide-out-to-left 0.4s ease-in-out",
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -48,5 +63,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 }

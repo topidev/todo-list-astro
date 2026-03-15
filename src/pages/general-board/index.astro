@@ -1,0 +1,9 @@
+---
+// src/pages/general-board/index.astro
+import Layout from '../../layouts/Layout.astro';
+import GeneralBoardApp from "../../components/toDo/GeneralBoardApp";
+---
+
+<Layout title="Mi Dashboard General">
+    <GeneralBoardApp client:only="react" />
+</Layout>

@@ -12,7 +12,8 @@ import {
     updateBoardName,
     updateBoard,
     updateTask as updateTaskFirestore,
-    moveTaskToBoard
+    moveTaskToBoard,
+    getTasks
 } from '../lib/firestoreService'
 import type { Board, Idea, Status } from '../types/types'
 import { collection, query, where } from 'firebase/firestore'
@@ -267,6 +268,29 @@ export function useBoard() {
         }
     }
 
+    const resumeBoard = async (userid: string) => {
+        try {
+            const userBoards = await getUserBoards(userid)
+            // console.log(userBoards)
+
+            const taskPromises = userBoards.map(async (board) => {
+                const boardTasks = await getTasks(board.id)
+                return boardTasks.map(task => ({
+                    ...task,
+                    boardName: board.name,
+                    boardColor: board.color
+                }))
+            })
+
+            const userTask = await Promise.all(taskPromises)
+            return userTask.flat()
+        } catch (err) {
+            console.log("Error: ", err)
+            throw err
+        }
+    }
+
+
     return {
         boards,
         currentBoard,
@@ -281,6 +305,7 @@ export function useBoard() {
         updateName,
         updateTask,
         updateBoardDetails,
-        moveTask
+        moveTask,
+        resumeBoard
     }
 }

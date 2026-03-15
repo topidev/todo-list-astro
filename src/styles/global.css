@@ -39,3 +39,20 @@
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+[data-side="left"] {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform;
+}
+
+/* Estado Cerrado: Lo mandamos fuera de la pantalla */
+[data-side="left"][data-state="closed"] {
+  transform: translateX(-100%) !important;
+  opacity: 1 !important; /* Evitamos el fade que no querías */
+}
+
+/* Estado Abierto: Lo traemos a la vista */
+[data-side="left"][data-state="open"] {
+  transform: translateX(0) !important;
+  opacity: 1 !important;
+}

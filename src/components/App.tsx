@@ -33,7 +33,8 @@ function AppContent() {
     removeBoard,
     updateTask,
     updateBoardDetails,
-    moveTask
+    moveTask,
+    resumeBoard
   } = useBoard()
 
   const isMobile = useIsMobile()
@@ -123,9 +124,10 @@ function AppContent() {
         onEditBoard={handleOpenEditBoard}
         onDeleteBoard={removeBoard}
         onOpenModal={setOpenModal}
+        resumeBoard={resumeBoard}
       />
-      <div className="ml-0 md:ml-64 min-h-screen pt-16 md:pt-0">
-        <div className="container mx-auto max-w-7xl py-8">
+      <div className="ml-0 min-h-screen pt-16 md:pt-10">
+        <div className="container mx-auto max-w-[1750px] py-8">
           {user ? (
             <>
               {/* header con el nombre del board actual */}

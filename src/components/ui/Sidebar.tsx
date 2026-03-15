@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, Edit2, EllipsisVertical, Menu, PencilLine, Plus, Share, Share2, Trash2, User, X } from 'lucide-react'
+import { Check, Edit2, EllipsisVertical, LoaderCircle, Menu, PencilLine, Plus, Share, Share2, Trash2, User, X } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { Button } from './button'
 import { Avatar, AvatarImage, AvatarFallback } from './avatar'
@@ -29,6 +29,7 @@ interface SideBarProps {
   onDeleteBoard?: (boardId: string) => void
   onOpenModal: (open: boolean) => void
   setOpenSheet?: (open: boolean) => void
+  resumeBoard:(userId: string) => void
 }
 
 
@@ -40,11 +41,13 @@ function SidebarContent({
   onEditBoard,
   onDeleteBoard,
   onOpenModal,
-  setOpenSheet
+  setOpenSheet,
+  resumeBoard
 }: SideBarProps) {
 
   const { user, signInWithGoogle, signOut } = useAuth()
   const [openMiniMenu, setOpenMiniMenu] = useState(false)
+  const [loadingSummary, setLoadingSummary] = useState(false) 
 
   const handleCreateBoard = () => {
     onCreateBoard()
@@ -93,12 +96,38 @@ function SidebarContent({
 
   }
 
+  const handleSummary = (uid: string) => {
+    // try {
+    //   setLoadingSummary(true)
+    //   resumeBoard(uid)
+    // } catch (error) {
+    //   console.log("Error: ", error)
+    //   throw error
+    // } finally {
+    //   setLoadingSummary(false)
+    // }
+    window.location.href = '/general-board'
+  }
+
 
   return (
     <div className="flex h-full justify-between flex-col">
       {/* Header */}
       <div className=" my-4">
-        <h2 className='text-xl font-bold'> To-Do List </h2>
+        {user && (
+          <Button
+            variant='ghost'
+            title='Board General'
+            className='w-full border border-gray-600 rounded text-center'
+            onClick={() => handleSummary(user.uid)}
+          >
+            {loadingSummary && (
+              <LoaderCircle className='animate-rotate-360 mr-6'/>
+            )}
+            <h2 className='text-xl font-bold'> Tablero General </h2>
+          </Button>
+        )}
+          
       </div>
 
 
@@ -202,7 +231,7 @@ function SidebarContent({
         </div>
       )}
 
-      <div className="flex-1 hidden md:block"></div>
+      {/* <div className="flex-1 hidden md:block"></div> */}
 
       {/* Usuario */}
       {
@@ -248,12 +277,15 @@ export default function Sidebar(props: SideBarProps) {
           <Button
             variant="outline"
             size="icon"
-            className="fixed-menu fixed top-4 left-4 z-20 md:hidden"
+            className="fixed-menu fixed top-4 left-4 z-20"
           >
             <Menu className="h-4 text-white w-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className='fixed-sidebar flex flex-col text-center'>
+        <SheetContent 
+          side="left"
+          forceMount 
+          className='fixed-sidebar w-full max-w-sm flex flex-col text-center opac'>
           <SheetHeader>
             <SheetTitle className='sidebar-title'>MENÚ</SheetTitle>
           </SheetHeader>
@@ -264,9 +296,9 @@ export default function Sidebar(props: SideBarProps) {
       </Sheet>
 
       {/* Sidebar fijo para desktop */}
-      <div className="hidden fixed-sidebar md:block fixed left-0 top-0 h-screen w-64 p-4">
+      {/* <div className="hidden fixed-sidebar md:block fixed left-0 top-0 h-screen w-64 p-4">
         <SidebarContent {...props} />
-      </div>
+      </div> */}
     </>
   )
 }

@@ -153,3 +153,16 @@ export function formatDate(dueDate: Date | undefined): string {
     })
 
 }
+
+// Obtener que tan urgente es una tarea
+export const getUrgency = (dueDate: Timestamp | null) => {
+    if (!dueDate) return 'no-date';
+    
+    const now = new Date();
+    const due = dueDate.toDate(); // Convertimos Timestamp a Date de JS
+    const diffInDays = (due.getTime() - now.getTime()) / (1000 * 3600 * 24);
+
+    if (diffInDays < 0) return 'urgent'; // Vencidas
+    if (diffInDays <= 3) return 'upcoming'; // Próximas (3 días o menos)
+    return 'safe'; // Con fecha pero lejana
+};
