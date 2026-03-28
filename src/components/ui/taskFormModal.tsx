@@ -17,9 +17,9 @@ interface TaskFormProps {
     onOpenModal: (open: boolean) => void
     onSubmit: (data: TaskFormData) => Promise<void>
     onBoardChange?: (
-        taskId: string, 
+        taskId: string,
         newBoardId: string,
-        updatedData?: Partial<Idea> 
+        updatedData?: Partial<Idea>
     ) => Promise<void>
 }
 
@@ -27,7 +27,7 @@ export interface TaskFormData {
     text: string
     description?: string
     dueDate?: Date
-    boardId?: string  
+    boardId?: string
 }
 
 export default function TaskFormModal({
@@ -129,6 +129,7 @@ export default function TaskFormModal({
                         <DialogClose asChild>
                             <button
                                 type="button"
+                                tabIndex={-1}
                                 className="p-1 hover:bg-gray-600 rounded transition-colors"
                             >
                                 <X className="h-5 w-5 text-gray-400" />
@@ -151,6 +152,7 @@ export default function TaskFormModal({
                                 placeholder="Ej: Terminar el informe"
                                 maxLength={100}
                                 required
+                                tabIndex={1}
                                 autoFocus={mode === 'edit'}
                                 className="w-full px-3 py-2 bg-slate-900 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
@@ -182,7 +184,7 @@ export default function TaskFormModal({
                                 </select>
                                 {boardChanged && (
                                     <p className="text-xs text-orange-400">
-                                        La tarea se moverá de "{boards.find(b => b.id === currentBoardId)?.name}" 
+                                        La tarea se moverá de "{boards.find(b => b.id === currentBoardId)?.name}"
                                         a "{boards.find(b => b.id === selectedBoardId)?.name}"
                                     </p>
                                 )}
@@ -237,10 +239,10 @@ export default function TaskFormModal({
                         {boardChanged && (
                             <div className="p-3 bg-orange-900/30 border border-orange-500 rounded-lg">
                                 <div className="flex items-center gap-2">
-                                <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full" />
-                                <p className="text-sm text-orange-300">
-                                    Esta tarea se moverá al guardar
-                                </p>
+                                    <div className="animate-pulse h-2 w-2 bg-orange-500 rounded-full" />
+                                    <p className="text-sm text-orange-300">
+                                        Esta tarea se moverá al guardar
+                                    </p>
                                 </div>
                             </div>
                         )}
